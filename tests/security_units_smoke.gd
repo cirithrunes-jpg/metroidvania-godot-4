@@ -57,8 +57,8 @@ func run():
 	for child in scene.level.get_children(): child.queue_free()
 	await ticks(2)
 	patrol.fire_round()
-	await ticks(35)
-	check(scene.level.get_child_count() == 0,"solid wall stops security projectile")
+	await ticks(60)
+	check(scene.level.get_child_count() == 0,"solid wall stops security projectile and impact expires")
 	wall.queue_free()
 	await ticks(2)
 	var drone = units[3]

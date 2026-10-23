@@ -2,6 +2,8 @@ extends Area2D
 
 var velocity := Vector2.ZERO
 var lifetime := 0.0
+var spent := false
+const FX = preload("res://prototype/combat/ballistic_fx.gd")
 
 func _ready():
 	collision_layer = 0
@@ -16,16 +18,31 @@ func _ready():
 	z_index = 8
 
 func _physics_process(delta):
-	position += velocity * delta
+	if spent: return
+	var next: Vector2 = global_position+velocity*delta
+	var query := PhysicsRayQueryParameters2D.create(global_position,next,17)
+	query.collide_with_areas = true
+	var hit := get_world_2d().direct_space_state.intersect_ray(query)
+	if not hit.is_empty():
+		global_position = hit.position
+		_on_area_entered(hit.collider)
+		return
+	global_position = next
 	lifetime += delta
 	if lifetime > 3.5: queue_free()
 
 func _on_area_entered(area):
+	if spent: return
+	spent = true
 	if area is Hurtbox:
 		area.take_hit(self,1)
-		queue_free()
+	var impact := Node2D.new()
+	impact.set_script(FX)
+	impact.direction = -velocity.normalized()
+	get_parent().add_child(impact)
+	impact.global_position = global_position
+	queue_free()
 
 func _draw():
-	draw_line(-velocity.normalized()*5,Vector2.ZERO,Color("973e58"),1.5)
-	draw_circle(Vector2.ZERO,1.5,Color("ff6979"))
-	draw_circle(Vector2.ZERO,0.6,Color("ffe3db"))
+	draw_line(-velocity.normalized()*7,Vector2.ZERO,Color(1,0.53,0.24,0.2),2)
+	draw_line(-velocity.normalized()*5,Vector2.ZERO,Color("ffe2a8"),0.7)

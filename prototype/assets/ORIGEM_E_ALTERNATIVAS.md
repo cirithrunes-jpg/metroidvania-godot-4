@@ -34,3 +34,11 @@ Os assets que ja existiam na base do projeto permanecem com suas respectivas con
 ## Inimigos adaptados de modelos existentes
 
 A familia de seguranca usa a folha CC0 Space soldier, de drakzlin, como base editada por IA. A copia original, a origem, a licenca, as modificacoes e o hash estao registrados em `enemies/SOURCE.md`. Esse e o primeiro conjunto de arte de terceiros incorporado ao laboratorio; as alternativas UniversalCharacterBases e Huntress continuam apenas pesquisadas.
+
+## Revisao v6: plataformas, porta e interface
+
+`platform-steel-v6.png` e `pressure-door-v6.png`: artes originais geradas com a ferramenta de imagens da OpenAI em 23/10/2026 para o projeto, sem copiar imagens de outros jogos. Plataforma com textura metalica e porta pressurizada com paineis deslizantes montados pelo Godot. A textura da plataforma e recortada para retirar a margem da imagem e repetida ao longo da geometria. A porta usa recortes da mesma imagem para manter o batente fixo e abrir os paineis.
+
+Os novos tiros/impactos sao desenhados por codigo em `prototype/combat`, com rastros, faiscas e clarao; nao sao gravacoes nem simulacao fotorealista. A fonte usa SystemFont do Godot (Segoe UI, Arial ou DejaVu Sans, conforme disponivel no sistema), sem copiar ou redistribuir arquivos de fontes do Windows.
+
+O atlas antigo `player/player.png` e seu arquivo de importacao foram excluidos nesta revisao. A copia original permanece na branch de backup. A nova personagem continua usando o atlas feminino original ja documentado. O menu antigo nao e mais oferecido.

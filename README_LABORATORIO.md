@@ -1,91 +1,64 @@
-# Laboratorio / 01 — primeira evolucao jogavel
+# Laboratorio — campanha revisada (v6)
 
-Prototipo incremental para `cirithrunes-jpg/metroidvania-godot-4`.
-Base preservada: `32b73e35851e0f6eb58ba2469b38e3d73daccd9a`.
-Branch original: `backup/original-2026-10-23`.
-Branch de trabalho: `feature/laboratorio-cyberpunk`.
+Projeto Godot de `cirithrunes-jpg/metroidvania-godot-4`.
+Branch de desenvolvimento: `feature/laboratorio-cyberpunk`.
+Original preservado: `backup/original-2026-10-23`, commit `32b73e35851e0f6eb58ba2469b38e3d73daccd9a`.
 
-## Abrir e testar
+## Abrir
 
-1. No GitHub, selecione a branch `feature/laboratorio-cyberpunk`, clique em **Code > Download ZIP** e extraia o arquivo.
-2. No Godot 4, clique em **Importar**, selecione `project.godot` e aguarde a importacao. Validado com Godot 4.7.2, renderizador Compatibility.
-3. Aperte **F6** com `prototype/laboratory.tscn` aberta, ou **F5** e escolha **Jogar laboratorio (prototipo)**.
-4. Suba pelas plataformas, toque no rele azul na plataforma alta e siga ate a saida a direita.
-5. O menu tambem oferece **Jogar versao original** e **Carregar original**.
+1. Extraia o ZIP atualizado em uma pasta nova, sem misturar arquivos de versoes anteriores.
+2. No Godot **4.7.2** (versao testada), importe `project.godot` e aguarde a importacao.
+3. Pressione **F5** e escolha **Jogar**.
 
-Na copia local, o projeto esta na pasta `Game`, junto deste documento.
+A campanha atual tem **tres setores conectados**, com variacoes de percurso, posicionamento de plataformas, reles, inimigos e tonalidade do ambiente. Eles compartilham o kit visual industrial. A porta leva automaticamente ao setor seguinte; a ultima leva a conclusao da campanha.
 
-## Controles
+## Controles e objetivo
 
-- A/D ou setas esquerda/direita: movimento.
-- W ou seta para cima: pular; pressione novamente no ar para salto duplo.
-- Mouse: mirar; clique esquerdo: atirar.
-- S ou seta para baixo: descer plataformas quando suportado pelo controlador original.
-- ESC ou E: pausar/retomar laboratorio.
-- R: reiniciar laboratorio; TAB: voltar ao menu.
+- A/D ou setas: mover.
+- W, seta para cima ou espaco: pular; pressione novamente para salto duplo.
+- Mouse: mirar; botao esquerdo: disparar.
+- Esc ou E: pausar/retomar.
+- Tab: menu.
+- R: reiniciar o setor atual.
 
-## Conteudo desta etapa
+Em cada setor, suba ate o rele luminoso e toque nele. Ele ativa o checkpoint e libera a porta a direita. Ao se aproximar da porta no nivel do chao, os paineis se abrem. Entre na abertura para atravessar com uma transicao de tela. Nao basta estar perto da borda da fase ou acima da porta. O checkpoint fica apenas em memoria e reinicia ao sair/reiniciar o setor. Quedas devolvem ao checkpoint; morte tambem recria a personagem.
 
-- Fase horizontal de 960 x 180 unidades, com passarelas, saltos, cinco inimigos de seguranca e objetivo final.
-- Rele de energia que ativa um checkpoint durante a partida e libera a conclusao.
-- Queda devolve ao checkpoint e tira uma unidade de integridade, sem matar; morte por combate recria o jogador no checkpoint.
-- Paleta grafite, azul eletrico e vermelho de emergencia; tanques, paineis, luzes de alarme pulsantes e fachos desenhados em 2D.
-- Protagonista feminina biomecanica com atlas original gerado, cabelo prateado e detalhes luminosos. Ciclo de corrida com seis quadros, repouso, subida, apice, queda, parede e aterrissagem, com respiracao e recuperacao de impacto suaves. Colisores do laboratorio ajustados a silhueta mais alta; cena original preservada.
-- Reaproveita o controlador, tiros, inimigos, efeitos e audio ja presentes no repositorio. Os novos inimigos adaptam uma folha CC0 de drakzlin, com origem e modificacoes documentadas em prototype/assets/enemies/SOURCE.md.
-- Cenas e scripts das tres fases originais mantidos. O menu recebeu acesso adicional ao prototipo.
+## Revisao solicitada
 
-Este e um estudo jogavel da direcao visual; nome, historia, habilidades finais e design definitivo continuam em aberto. A iluminacao usa sobreposicoes de cor, sem sombras dinamicas. O checkpoint do laboratorio nao e salvo em disco e reinicia ao sair/reiniciar. O salvamento original continua acessivel pelo menu original. Ainda e necessario playtest humano para ajustar dificuldade e sensacao dos saltos.
+- **Tiros:** novos projeteis com teste continuo de colisao por segmento, rastro curto, clarao de boca, recuo da arma, faiscas e pequena fumaca de impacto. Tiros param em paredes e inimigos; efeitos expiram. Os efeitos antigos de tiro nao sao usados pela campanha atual.
+- **Plataformas:** textura original de aco desgastado, grades, rebites, borda usinada e faixa luminosa discreta. O desenho acompanha as colisoes.
+- **Movimento:** controlador novo com aceleracao/frenagem progressivas, tolerancia na borda, memoria curta do comando de salto, salto duplo, parede, interpolacao fisica, camera suavizada e transicao curta entre quadros da personagem. Limite de renderizacao ampliado para 120 FPS; isso nao garante 120 FPS em todo computador.
+- **Textos:** fonte de sistema limpa, com acentos, painel em alta resolucao, contraste escuro e tamanho maior. Sem a fonte pixelada anterior na interface atual.
+- **Modelo anterior:** atlas antigo `player/player.png` e seu importador excluidos. A cena antiga do jogador agora encaminha para a nova personagem; a campanha usa diretamente `prototype/player.tscn`. O menu foi refeito com apenas Jogar/Sair, sem acesso a versao antiga ou carregamento antigo. O original continua recuperavel na branch de backup.
+- **Porta:** arte original de porta pressurizada, batente fixo, paineis deslizantes, indicador de bloqueio/liberacao, deteccao de aproximacao, entrada e passagem para o proximo setor. A musica continua durante as transicoes.
 
-## Estrutura examinada
+## Inimigos e audio
 
-`world.tscn` + `world.gd`: jogador, HUD e troca das fases. `world/level_one.tscn`, `level_two.tscn`, `level_three.tscn`: conteudo original. `player/player.gd`: movimento, salto duplo, wall jump e combate. `enemies/`: inimigos. `menus/`: inicio, pausa e derrota. Autoloads: estatisticas, eventos, instancias, som, musica e salvamento.
+Cinco unidades por setor: patrulheiro (2 de integridade), atirador (2), blindado (4), drone (2) e robo (5). Aviso antes do tiro, linha de visao bloqueada por paredes e patrulhas que evitam fossos. Sem ondas infinitas. Arte adaptada de modelos CC0 de drakzlin; fonte e modificacoes em `prototype/assets/enemies/SOURCE.md`.
 
-A nova cena `prototype/laboratory.tscn` herda o contrato de `World` e contem um `Level`, para preservar a integracao tipada dos tiros e efeitos. O desenho do personagem esta em `prototype/specimen.gd` e e aplicado apenas ao prototipo.
+A trilha MP3 fornecida pelo usuario toca em loop. O barramento Master esta habilitado. Origem de todas as novas artes e da trilha em `prototype/assets/ORIGEM_E_ALTERNATIVAS.md`.
 
-## Validacao reproduzivel
+## Estrutura atual
 
-Execute com o executavel Godot no PATH:
+- `prototype/laboratory.tscn`, `sector_2.tscn`, `sector_3.tscn`: setores da campanha.
+- `prototype/laboratory.gd`: percursos, plataformas, reles e progressao.
+- `prototype/controller.gd`, `player.tscn`, `specimen.gd`: controle e animacao da personagem atual.
+- `prototype/combat/`: arma, projeteis e efeitos novos.
+- `prototype/pressure_door.gd`: animacao e entrada na porta.
+- `prototype/ui/`: fonte, HUD e conclusao.
+- `prototype/enemies/`: familia de seguranca.
+
+Alguns scripts de infraestrutura originais sao mantidos para compatibilidade dos autoloads e tipos. Eles nao representam uma opcao de jogo antigo no menu.
+
+## Validacao
 
 ```text
 godot --headless --editor --path . --quit
 godot --headless --path . --script res://tests/laboratory_smoke.gd
-```
-
-O teste verifica 18 condicoes (incluindo quatro verificacoes da nova arte e animacao): nascimento, chao, movimento, salto, integracao dos disparos/efeitos, rele, queda, renascimento, checkpoint, pausa, retomada, conclusao, menu e abertura do jogo original. Nao substitui um playtest manual completo; os testes de progressao posicionam o personagem para exercitar cada transicao.
-
-Tambem executado com renderizacao Compatibility/ANGLE e captura visual inspecionada. Neste computador o Godot informa falha de leitura do repositorio de certificados do sistema; isso tambem aparece na base e nao impediu o teste local offline. Nenhuma alteracao foi mesclada na main.
-
-## Revisao da personagem v2
-
-Arte e animacao integradas somente ao laboratorio. Origem e alternativas do GitHub documentadas em prototype/assets/ORIGEM_E_ALTERNATIVAS.md. Validacao com 18 verificacoes aprovadas no Godot 4.7.2 e captura visual inspecionada. O render do atlas usa filtro linear para evitar contornos serrilhados na ampliacao da janela. A personagem continua uma proposta artistica em evolucao.
-
-
-## Revisao do fundo v3
-
-O laboratorio agora usa um panorama original com texturas mais realistas de concreto, metal desgastado, dutos, cabos e janelas de contencao. A imagem preserva suas proporcoes e fica atras das plataformas e da personagem. As instrucoes receberam um painel escuro translucido para facilitar a leitura. Esta revisao altera apenas o visual do fundo; o percurso e suas colisoes foram preservados. Validacao: as mesmas 18 verificacoes passaram com renderizacao no Godot 4.7.2 e a captura dentro do jogo foi inspecionada.
-
-## Trilha sonora
-
-O laboratorio toca em loop a trilha `钢铁地牢 (2).mp3` fornecida pelo usuario, copiada para `prototype/assets/steel-dungeon-soundtrack.mp3`. O barramento Master foi reativado para a reproducao ser ouvida. Ao entrar na campanha original, a musica original volta a tocar. Validacao ampliada para 20 verificacoes, incluindo stream MP3 carregado e em reproducao, loop ativo, duracao valida, Master habilitado e preservacao da trilha original.
-
-## Esquadrao de seguranca
-
-Cinco unidades no laboratorio, uma de cada tipo, substituem os tres inimigos provisorios anteriores. Arte adaptada de modelos existentes CC0 de drakzlin, com fonte original e creditos em `prototype/assets/enemies/SOURCE.md`.
-
-| Tipo | Integridade | Comportamento |
-| --- | --- | --- |
-| Patrulheiro | 2 | Patrulha curta, rifle compacto, alcance moderado |
-| Atirador | 2 | Maior alcance, aviso de mira mais longo, tiro mais rapido |
-| Blindado | 4 | Movimento lento, protecao maior, alcance menor |
-| Drone | 2 | Flutua em uma area curta, disparos lentos e espacados |
-| Robo de contencao | 5 | Mais resistente, lento, disparos mais lentos e espacados |
-
-Cada unidade avisa antes de disparar (0,65 s; atirador 0,9 s), exige linha de visao sem paredes, dispara um projetil por vez e causa uma unidade de dano. Paredes bloqueiam os tiros; unidades terrestres evitam as bordas. Nao ha ondas infinitas ou chefes novos. Os inimigos permanecem derrotados durante a partida e voltam ao reiniciar o laboratorio. Ao concluir a fase, o combate para. Ainda e necessario playtest humano para ajuste fino de dificuldade e animacoes.
-
-Validacao adicional:
-
-```text
 godot --headless --path . --script res://tests/security_units_smoke.gd
+godot --headless --path . --script res://tests/ballistics_smoke.gd
 ```
 
-A suite de seguranca verifica 18 condicoes: quantidade, cinco animacoes de seis quadros, cobertura dos tipos, resistencias diferentes, aviso antes do tiro, tempo de reacao, disparo, dano, linha de visao, bloqueio por parede, voo, patrulha junto ao fosso e destruicao. A suite geral continua com 20 verificacoes. `tests/enemy_gallery.gd` gera uma imagem da familia de inimigos com renderizacao real do Godot.
+**58 verificacoes aprovadas:** 33 de campanha/controle/interface/portas, 18 de inimigos e 7 de balistica. A suite de campanha tambem foi executada com renderizacao Compatibility/ANGLE e suas capturas foram inspecionadas. Os testes posicionam a personagem diretamente para verificar transicoes e nao substituem um playtest humano completo dos saltos, da dificuldade e da animacao.
+
+Neste computador, o Godot informa falha de leitura do repositorio de certificados do sistema; o aviso tambem ocorre na base e nao impediu os testes locais offline. Nenhuma alteracao foi mesclada na main.

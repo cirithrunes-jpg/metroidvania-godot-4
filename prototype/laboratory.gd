@@ -3,37 +3,54 @@ extends World
 const CYAN := Color("28cfff")
 const RED := Color("f34e64")
 const BACKDROP = preload("res://prototype/assets/laboratory-wall-v3.png")
+const PLATFORM = preload("res://prototype/assets/platform-steel-v6.png")
 const LAB_SOUNDTRACK = preload("res://prototype/assets/steel-dungeon-soundtrack.mp3")
-const FLOORS := [Rect2(0,152,260,28), Rect2(300,152,310,28), Rect2(660,152,300,28), Rect2(184,120,60,8), Rect2(342,116,70,8), Rect2(446,80,74,8), Rect2(560,112,60,8), Rect2(704,114,70,8)]
+const FLOORS := [Rect2(0,152,260,28),Rect2(300,152,310,28),Rect2(660,152,300,28),Rect2(184,120,60,8),Rect2(342,116,70,8),Rect2(446,80,74,8),Rect2(560,112,60,8),Rect2(704,114,70,8)]
+@export_range(1,3) var sector := 1
+var floors: Array = FLOORS
 var player: CharacterBody2D
 var checkpoint := Vector2(36,148)
+var relay_point := Vector2(484,80)
+var relay_checkpoint := Vector2(570,108)
+var deployment := [Vector2(165,152),Vector2(382,116),Vector2(550,152),Vector2(682,77),Vector2(831,152)]
 var relay := false
 var finished := false
+var transitioning := false
 var paused := false
 var elapsed := 0.0
-var status: Label
-var health: Label
+var hud: CanvasLayer
+var exit_door: Node2D
 
 func _enter_tree():
 	MainInstances.world = self
 
+func configure_sector():
+	if sector == 2:
+		floors = [Rect2(0,152,240,28),Rect2(282,152,330,28),Rect2(656,152,304,28),Rect2(166,120,66,8),Rect2(348,114,72,8),Rect2(480,80,76,8),Rect2(584,112,66,8),Rect2(730,116,70,8)]
+		relay_point = Vector2(514,80)
+		relay_checkpoint = Vector2(598,108)
+		deployment = [Vector2(155,152),Vector2(385,114),Vector2(555,152),Vector2(696,76),Vector2(850,152)]
+	elif sector == 3:
+		floors = [Rect2(0,152,268,28),Rect2(308,152,290,28),Rect2(648,152,312,28),Rect2(182,120,62,8),Rect2(326,116,74,8),Rect2(424,80,76,8),Rect2(542,112,72,8),Rect2(716,114,72,8)]
+		relay_point = Vector2(458,80)
+		relay_checkpoint = Vector2(560,108)
+		deployment = [Vector2(160,152),Vector2(364,116),Vector2(546,152),Vector2(680,77),Vector2(840,152)]
 
 func _ready():
+	configure_sector()
 	PlayerStats.reset()
 	WorldStash.data = {}
 	RenderingServer.set_default_clear_color(Color("090e17"))
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	var backdrop := Sprite2D.new()
-	backdrop.name = "LaboratoryBackdrop"
 	backdrop.texture = BACKDROP
 	backdrop.centered = false
-	backdrop.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	# Preserve proportions; the viewport crops the lower service wall behind the floors.
-	backdrop.scale = Vector2.ONE * (960.0 / BACKDROP.get_width())
+	backdrop.scale = Vector2.ONE*(960.0/BACKDROP.get_width())
 	backdrop.position = Vector2(0,-36)
-	backdrop.modulate = Color(0.72,0.77,0.84,1)
+	backdrop.modulate = [Color(0.72,0.77,0.84),Color(0.64,0.77,0.81),Color(0.8,0.67,0.72)][sector-1]
 	backdrop.z_index = -5
 	add_child(backdrop)
-	for rect in FLOORS:
+	for rect in floors:
 		var body := StaticBody2D.new()
 		var shape := CollisionShape2D.new()
 		var box := RectangleShape2D.new()
@@ -42,7 +59,7 @@ func _ready():
 		body.position = rect.get_center()
 		body.add_child(shape)
 		add_child(body)
-	for x in [-8, 960]:
+	for x in [-8,960]:
 		var wall := StaticBody2D.new()
 		var collision := CollisionShape2D.new()
 		var box := RectangleShape2D.new()
@@ -52,94 +69,93 @@ func _ready():
 		wall.add_child(collision)
 		add_child(wall)
 	spawn_player()
-	# A small mixed squad: three soldiers, one drone and one containment robot.
-	var deployment := [Vector2(188,152),Vector2(382,116),Vector2(550,152),Vector2(682,77),Vector2(831,152)]
 	for index in deployment.size():
 		var enemy = preload("res://prototype/enemies/security_unit.tscn").instantiate()
 		enemy.kind = index
 		enemy.position = deployment[index]
-		enemy.patrol_radius = 16.0 if index == 1 else 22.0
+		enemy.patrol_radius = 16.0 if index == 1 else 20.0
 		add_child(enemy)
-	var canvas := CanvasLayer.new()
-	add_child(canvas)
-	var panel := ColorRect.new()
-	panel.color = Color("101927")
-	panel.size = Vector2(320,32)
-	canvas.add_child(panel)
-	health = Label.new()
-	health.position = Vector2(7,2)
-	health.add_theme_font_size_override("font_size",8)
-	canvas.add_child(health)
-	status = Label.new()
-	status.position = Vector2(7,17)
-	status.add_theme_font_size_override("font_size",8)
-	canvas.add_child(status)
+	hud = CanvasLayer.new()
+	hud.set_script(preload("res://prototype/ui/campaign_hud.gd"))
+	add_child(hud)
+	exit_door = Node2D.new()
+	exit_door.set_script(preload("res://prototype/pressure_door.gd"))
+	exit_door.position = Vector2(923,152)
+	add_child(exit_door)
+	exit_door.entered.connect(begin_transition)
+	world_label("RELÉ / CHECKPOINT",relay_point+Vector2(-24,-34))
+	world_label("PRÓXIMO SETOR" if sector<3 else "SAÍDA",Vector2(899,73))
 	Events.player_died.connect(respawn)
-	Music.play(LAB_SOUNDTRACK)
+	if Music.audio_stream_player.stream != LAB_SOUNDTRACK or not Music.audio_stream_player.playing:
+		Music.play(LAB_SOUNDTRACK)
+
+func world_label(text: String, point: Vector2):
+	var label := Label.new()
+	label.text = text
+	label.position = point
+	label.scale = Vector2.ONE/4
+	label.add_theme_font_size_override("font_size",19)
+	label.modulate = Color("b2e4ea")
+	add_child(label)
 
 func spawn_player():
-	player = preload("res://player/player.tscn").instantiate()
+	player = preload("res://prototype/player.tscn").instantiate()
 	player.position = checkpoint
 	add_child(player)
-	# Match the taller silhouette only in the laboratory; preserve the original scene.
-	for path in ["CollisionShape2D", "Hurtbox/CollisionShape2D"]:
-		var collider = player.get_node(path)
-		collider.shape = collider.shape.duplicate()
-		collider.shape.size = Vector2(10,26)
-		collider.position = Vector2(0,-13)
-	player.get_node("Sprite2D/RemoteTransform2D").position = Vector2(2,-4)
 	var blaster = player.get_node("PlayerBlaster/BlasterSprite")
-	blaster.self_modulate.a = 0
 	var weapon := Polygon2D.new()
-	weapon.polygon = PackedVector2Array([Vector2(-3,-2),Vector2(7,-2),Vector2(9,0),Vector2(7,2),Vector2(-3,2)])
-	weapon.color = Color("465e70")
+	weapon.polygon = PackedVector2Array([Vector2(-3,-2),Vector2(8,-2),Vector2(10,0),Vector2(8,2),Vector2(-3,2)])
+	weapon.color = Color("435663")
 	blaster.add_child(weapon)
 	var seam := Line2D.new()
-	seam.points = PackedVector2Array([Vector2(0,-1),Vector2(7,-1)])
-	seam.width = 0.6
+	seam.points = PackedVector2Array([Vector2(0,-1),Vector2(8,-1)])
+	seam.width = 0.5
 	seam.default_color = CYAN
 	blaster.add_child(seam)
-	player.get_node("Sprite2D").self_modulate.a = 0
-	var art := AnimatedSprite2D.new()
-	art.name = "Specimen"
-	art.set_script(preload("res://prototype/specimen.gd"))
-	art.actor = player
-	player.add_child(art)
 	var camera: Camera2D = player.get_node("Camera2D")
 	camera.limit_left = 0
 	camera.limit_right = 960
 	camera.limit_top = 0
 	camera.limit_bottom = 180
+	player.reset_physics_interpolation()
+	camera.reset_smoothing()
 
 func respawn():
 	await get_tree().create_timer(1.1).timeout
-	if not is_inside_tree(): return
+	if not is_inside_tree() or transitioning: return
 	for child in get_children():
 		if child is Camera2D: child.queue_free()
 	PlayerStats.refill()
 	spawn_player()
 
 func _process(delta):
-	elapsed += delta
+	if not paused: elapsed += delta
 	if is_instance_valid(player) and not paused and not finished:
 		if player.position.y > 195:
 			player.position = checkpoint
 			player.velocity = Vector2.ZERO
-			PlayerStats.health = maxi(1,PlayerStats.health - 1)
-		if player.position.distance_to(Vector2(484,80)) < 24:
+			player.reset_physics_interpolation()
+			player.get_node("Camera2D").reset_smoothing()
+			PlayerStats.health = maxi(1,PlayerStats.health-1)
+		if player.position.distance_to(relay_point)<24:
 			relay = true
-			checkpoint = Vector2(570,108)
-		if relay and player.position.x > 908:
-			finished = true
-			player.process_mode = Node.PROCESS_MODE_DISABLED
-			for enemy in get_tree().get_nodes_in_group("lab_enemies"):
-				enemy.process_mode = Node.PROCESS_MODE_DISABLED
-			level.process_mode = Node.PROCESS_MODE_DISABLED
-	health.text = "LAB / 01     INTEGRIDADE %d / %d" % [PlayerStats.health,PlayerStats.max_health]
-	status.text = "RELE ATIVO > SAIDA A DIREITA" if relay else "ATIVE O RELE AZUL NA PLATAFORMA ALTA"
-	if paused: status.text = "PAUSA / ESC RETOMA / TAB MENU"
-	if finished: status.text = "CONTENCAO ROMPIDA / R REINICIA / TAB MENU"
+			checkpoint = relay_checkpoint
+	exit_door.unlocked = relay
+	exit_door.paused = paused
+	hud.update_readout(sector,PlayerStats.health,PlayerStats.max_health,relay,paused)
 	queue_redraw()
+
+func begin_transition():
+	if transitioning: return
+	finished = true
+	transitioning = true
+	player.process_mode = Node.PROCESS_MODE_DISABLED
+	for enemy in get_tree().get_nodes_in_group("lab_enemies"): enemy.process_mode = Node.PROCESS_MODE_DISABLED
+	level.process_mode = Node.PROCESS_MODE_DISABLED
+	var tween: Tween = hud.fade_out()
+	await tween.finished
+	var path := "res://prototype/sector_%d.tscn" % (sector+1) if sector<3 else "res://prototype/ui/completed.tscn"
+	get_tree().change_scene_to_file(path)
 
 func toggle_pause():
 	if finished: return
@@ -148,41 +164,41 @@ func toggle_pause():
 		if child is Node2D: child.process_mode = Node.PROCESS_MODE_DISABLED if paused else Node.PROCESS_MODE_INHERIT
 
 func _unhandled_input(event):
-	if event.is_action_pressed("pause") and not event.is_echo():
-		toggle_pause()
+	if event.is_action_pressed("pause") and not event.is_echo(): toggle_pause()
 
 func _unhandled_key_input(event):
-	if not event.pressed or event.echo: return
-	if event.physical_keycode == KEY_R:
-		get_tree().reload_current_scene()
-	elif event.physical_keycode == KEY_TAB:
-		get_tree().change_scene_to_file("res://menus/start_menu.tscn")
+	if not event.pressed or event.echo or transitioning: return
+	if event.physical_keycode == KEY_R: get_tree().reload_current_scene()
+	elif event.physical_keycode == KEY_TAB: get_tree().change_scene_to_file("res://menus/start_menu.tscn")
 
 func _draw():
-	for rect in FLOORS:
-		draw_rect(rect,Color("303d49"))
-		draw_rect(Rect2(rect.position,Vector2(rect.size.x,2)),Color("8295a2"))
-		for x in range(int(rect.position.x)+4,int(rect.end.x)-4,12):
-			draw_line(Vector2(x,rect.position.y+4),Vector2(x+5,rect.position.y+7),Color("18232e"),2)
-	for x in [260,610]:
-		draw_rect(Rect2(x,170,50,10),RED)
-		for stripe in range(x,x+50,10):
-			draw_line(Vector2(stripe,170),Vector2(stripe+6,178),Color("251a27"),3)
-	for light in [Vector2(267,55),Vector2(755,59)]:
-		draw_circle(light,3,Color(1,0.16,0.25,0.08+sin(elapsed*3)*0.04))
-	draw_rect(Rect2(475,61,18,19),Color("224858"))
-	draw_rect(Rect2(478,64,12,8),CYAN if not relay else Color("a0ffda"))
-	draw_rect(Rect2(908,89,32,63),Color("233747"))
-	draw_rect(Rect2(912,93,24,59),CYAN if relay else RED,false,2)
-	var font := ThemeDB.fallback_font
-	draw_rect(Rect2(16,49,160,59),Color(0.025,0.04,0.065,0.84))
-	draw_string(font,Vector2(22,64),"CONTENCAO / 01",HORIZONTAL_ALIGNMENT_LEFT,-1,10,CYAN)
-	draw_string(font,Vector2(22,79),"A/D mover | W salto duplo",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("99abbc"))
-	draw_string(font,Vector2(22,91),"Mouse mira / clique atira",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("99abbc"))
-	draw_string(font,Vector2(22,103),"ESC pausa | TAB menu | R reinicia",HORIZONTAL_ALIGNMENT_LEFT,-1,7,Color("99abbc"))
-	draw_string(font,Vector2(452,54),"RELE / CHECKPOINT",HORIZONTAL_ALIGNMENT_LEFT,-1,8,CYAN)
-	draw_string(font,Vector2(895,82),"SAIDA",HORIZONTAL_ALIGNMENT_LEFT,-1,9,CYAN)
+	var source := Rect2(0,PLATFORM.get_height()*0.11,PLATFORM.get_width(),PLATFORM.get_height()*0.77)
+	for rect in floors:
+		var x: float = rect.position.x
+		while x < rect.end.x:
+			var width: float = minf(90,rect.end.x-x)
+			draw_texture_rect_region(PLATFORM,Rect2(x,rect.position.y,width,rect.size.y),Rect2(source.position,Vector2(source.size.x*width/90,source.size.y)))
+			x += width
+		draw_line(rect.position,Vector2(rect.end.x,rect.position.y),Color("a8b9c0"),0.45)
+		if rect.size.y < 10:
+			draw_line(rect.position+Vector2(4,8),rect.position+Vector2(12,13),Color("263a44"),1.2)
+			draw_line(rect.position+Vector2(rect.size.x-4,8),rect.position+Vector2(rect.size.x-12,13),Color("263a44"),1.2)
+	var pits := [260,610] if sector==1 else ([240,612] if sector==2 else [268,598])
+	for x in pits:
+		draw_rect(Rect2(x,176,42,4),Color("712433"))
+		draw_line(Vector2(x,174),Vector2(x+40,174),RED,0.7)
+	var panel := Rect2(relay_point+Vector2(-9,-22),Vector2(18,22))
+	draw_style_box(relay_style(),panel)
+	draw_rect(Rect2(relay_point+Vector2(-6,-18),Vector2(12,6)),CYAN if not relay else Color("a0ffda"))
+	draw_line(relay_point+Vector2(-5,-8),relay_point+Vector2(5,-8),Color("6b8b98"),1)
+
+func relay_style() -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color("1b2a35")
+	style.border_color = Color("6c8a97")
+	style.set_border_width_all(1)
+	return style
 
 func _exit_tree():
-	Music.audio_stream_player.stop()
+	if not transitioning: Music.audio_stream_player.stop()
 	MainInstances.world = null

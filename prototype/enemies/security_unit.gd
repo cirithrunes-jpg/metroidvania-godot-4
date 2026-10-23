@@ -10,7 +10,7 @@ const RANGE := [105.0,150.0,95.0,115.0,100.0]
 const COOLDOWN := [2.6,3.1,3.4,2.8,3.8]
 const SHOT_SPEED := [65.0,85.0,60.0,55.0,48.0]
 const ROUND = preload("res://prototype/enemies/security_round.gd")
-const DEATH = preload("res://effects/enemy_death_effect.tscn")
+const DEATH = preload("res://prototype/combat/ballistic_fx.gd")
 var health := 2
 var origin := Vector2.ZERO
 var facing := -1.0
@@ -143,6 +143,12 @@ func fire_round():
 	bullet.velocity = aim*SHOT_SPEED[kind]
 	MainInstances.level.add_child(bullet)
 	bullet.global_position = muzzle_position()
+	var flash := Node2D.new()
+	flash.set_script(preload("res://prototype/combat/ballistic_fx.gd"))
+	flash.mode = "muzzle"
+	flash.direction = aim
+	MainInstances.level.add_child(flash)
+	flash.global_position = muzzle_position()
 
 func take_damage(_hitbox, damage):
 	if dying: return
@@ -150,7 +156,11 @@ func take_damage(_hitbox, damage):
 	flash = 0.12
 	if health <= 0:
 		dying = true
-		Utils.instantiate_scene_on_level(DEATH,global_position+Vector2(0,-body_size.y/2))
+		var impact := Node2D.new()
+		impact.set_script(DEATH)
+		impact.direction = Vector2.UP
+		MainInstances.level.add_child(impact)
+		impact.global_position = global_position+Vector2(0,-body_size.y/2)
 		queue_free()
 
 func _draw():

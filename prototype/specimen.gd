@@ -11,6 +11,9 @@ var landing_time := 0.0
 var motion_blend := 0.0
 var squash := 0.0
 var facing := 1.0
+var previous: Sprite2D
+var last_texture: Texture2D
+var dissolve := 1.0
 
 func _ready():
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
@@ -19,13 +22,20 @@ func _ready():
 	sprite_frames = SpriteFrames.new()
 	sprite_frames.remove_animation("default")
 	add_sequence("idle",0,[0,1,2,3,4,5],7.0,true)
-	add_sequence("run",1,[0,1,2,3,4,5],12.0,true)
+	add_sequence("run",1,[0,1,2,3,4,5],16.0,true)
 	add_sequence("rise",2,[1,2],10.0,false)
 	add_sequence("apex",2,[3],1.0,false)
 	add_sequence("fall",2,[4],1.0,false)
 	add_sequence("wall",2,[5],1.0,false)
 	add_sequence("land",3,[0,1,2,3,4,5],24.0,false)
 	play("idle")
+	previous = Sprite2D.new()
+	previous.centered = false
+	previous.position = offset
+	previous.z_index = -1
+	add_child(previous)
+	last_texture = sprite_frames.get_frame_texture(animation,frame)
+	frame_changed.connect(blend_frame)
 	was_grounded = actor.is_on_floor()
 
 func add_sequence(label: String, row: int, columns: Array, fps: float, looped: bool):
@@ -42,9 +52,12 @@ func add_sequence(label: String, row: int, columns: Array, fps: float, looped: b
 func _process(delta):
 	if not is_instance_valid(actor): return
 	clock += delta
+	dissolve = minf(1,dissolve+delta/0.045)
+	self_modulate.a = dissolve
+	previous.self_modulate.a = 1-dissolve
 	var grounded := actor.is_on_floor()
 	var blend := 1.0-exp(-14.0*delta)
-	motion_blend = lerpf(motion_blend,clampf(absf(actor.velocity.x)/64.0,0,1),blend)
+	motion_blend = lerpf(motion_blend,clampf(absf(actor.velocity.x)/72.0,0,1),blend)
 	facing = actor.get_node("Sprite2D").scale.x
 	if grounded and not was_grounded:
 		landing_time = 0.18
@@ -62,10 +75,16 @@ func _process(delta):
 	elif landing_time > 0:
 		target = "land"
 	if animation != target: play(target)
-	speed_scale = lerpf(0.65,1.15,motion_blend) if target == "run" else 1.0
+	speed_scale = lerpf(0.6,1.1,motion_blend) if target == "run" else 1.0
 	if target == "run" and actor.velocity.x*facing < 0: speed_scale *= -1.0
 	var breathe := sin(clock*2.6)*0.004 if target == "idle" else 0.0
 	scale = Vector2(facing*DRAW_SCALE*(1.0+squash*0.5),DRAW_SCALE*(1.0-squash+breathe))
 	rotation = lerpf(rotation,clampf(actor.velocity.x/64.0,-1,1)*0.025,blend)
 	modulate = actor.get_node("Sprite2D").modulate
 	was_grounded = grounded
+
+func blend_frame():
+	if not is_instance_valid(previous): return
+	previous.texture = last_texture
+	last_texture = sprite_frames.get_frame_texture(animation,frame)
+	dissolve = 0.0
