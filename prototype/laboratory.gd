@@ -52,10 +52,13 @@ func _ready():
 		wall.add_child(collision)
 		add_child(wall)
 	spawn_player()
-	for x in [370,740,840]:
-		var enemy = preload("res://enemies/walking_enemy.tscn").instantiate()
-		enemy.position = Vector2(x,145)
-		enemy.modulate = Color("ec7486")
+	# A small mixed squad: three soldiers, one drone and one containment robot.
+	var deployment := [Vector2(188,152),Vector2(382,116),Vector2(550,152),Vector2(682,77),Vector2(831,152)]
+	for index in deployment.size():
+		var enemy = preload("res://prototype/enemies/security_unit.tscn").instantiate()
+		enemy.kind = index
+		enemy.position = deployment[index]
+		enemy.patrol_radius = 16.0 if index == 1 else 22.0
 		add_child(enemy)
 	var canvas := CanvasLayer.new()
 	add_child(canvas)
@@ -129,6 +132,9 @@ func _process(delta):
 		if relay and player.position.x > 908:
 			finished = true
 			player.process_mode = Node.PROCESS_MODE_DISABLED
+			for enemy in get_tree().get_nodes_in_group("lab_enemies"):
+				enemy.process_mode = Node.PROCESS_MODE_DISABLED
+			level.process_mode = Node.PROCESS_MODE_DISABLED
 	health.text = "LAB / 01     INTEGRIDADE %d / %d" % [PlayerStats.health,PlayerStats.max_health]
 	status.text = "RELE ATIVO > SAIDA A DIREITA" if relay else "ATIVE O RELE AZUL NA PLATAFORMA ALTA"
 	if paused: status.text = "PAUSA / ESC RETOMA / TAB MENU"
@@ -180,5 +186,3 @@ func _draw():
 func _exit_tree():
 	Music.audio_stream_player.stop()
 	MainInstances.world = null
-
-

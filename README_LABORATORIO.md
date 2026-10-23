@@ -26,12 +26,12 @@ Na copia local, o projeto esta na pasta `Game`, junto deste documento.
 
 ## Conteudo desta etapa
 
-- Fase horizontal de 960 x 180 unidades, com passarelas, saltos, tres inimigos e objetivo final.
+- Fase horizontal de 960 x 180 unidades, com passarelas, saltos, cinco inimigos de seguranca e objetivo final.
 - Rele de energia que ativa um checkpoint durante a partida e libera a conclusao.
 - Queda devolve ao checkpoint e tira uma unidade de integridade, sem matar; morte por combate recria o jogador no checkpoint.
 - Paleta grafite, azul eletrico e vermelho de emergencia; tanques, paineis, luzes de alarme pulsantes e fachos desenhados em 2D.
 - Protagonista feminina biomecanica com atlas original gerado, cabelo prateado e detalhes luminosos. Ciclo de corrida com seis quadros, repouso, subida, apice, queda, parede e aterrissagem, com respiracao e recuperacao de impacto suaves. Colisores do laboratorio ajustados a silhueta mais alta; cena original preservada.
-- Reaproveita o controlador, tiros, inimigos, efeitos e audio ja presentes no repositorio. Nenhum novo asset externo foi copiado ou baixado.
+- Reaproveita o controlador, tiros, inimigos, efeitos e audio ja presentes no repositorio. Os novos inimigos adaptam uma folha CC0 de drakzlin, com origem e modificacoes documentadas em prototype/assets/enemies/SOURCE.md.
 - Cenas e scripts das tres fases originais mantidos. O menu recebeu acesso adicional ao prototipo.
 
 Este e um estudo jogavel da direcao visual; nome, historia, habilidades finais e design definitivo continuam em aberto. A iluminacao usa sobreposicoes de cor, sem sombras dinamicas. O checkpoint do laboratorio nao e salvo em disco e reinicia ao sair/reiniciar. O salvamento original continua acessivel pelo menu original. Ainda e necessario playtest humano para ajustar dificuldade e sensacao dos saltos.
@@ -67,3 +67,25 @@ O laboratorio agora usa um panorama original com texturas mais realistas de conc
 ## Trilha sonora
 
 O laboratorio toca em loop a trilha `钢铁地牢 (2).mp3` fornecida pelo usuario, copiada para `prototype/assets/steel-dungeon-soundtrack.mp3`. O barramento Master foi reativado para a reproducao ser ouvida. Ao entrar na campanha original, a musica original volta a tocar. Validacao ampliada para 20 verificacoes, incluindo stream MP3 carregado e em reproducao, loop ativo, duracao valida, Master habilitado e preservacao da trilha original.
+
+## Esquadrao de seguranca
+
+Cinco unidades no laboratorio, uma de cada tipo, substituem os tres inimigos provisorios anteriores. Arte adaptada de modelos existentes CC0 de drakzlin, com fonte original e creditos em `prototype/assets/enemies/SOURCE.md`.
+
+| Tipo | Integridade | Comportamento |
+| --- | --- | --- |
+| Patrulheiro | 2 | Patrulha curta, rifle compacto, alcance moderado |
+| Atirador | 2 | Maior alcance, aviso de mira mais longo, tiro mais rapido |
+| Blindado | 4 | Movimento lento, protecao maior, alcance menor |
+| Drone | 2 | Flutua em uma area curta, disparos lentos e espacados |
+| Robo de contencao | 5 | Mais resistente, lento, disparos mais lentos e espacados |
+
+Cada unidade avisa antes de disparar (0,65 s; atirador 0,9 s), exige linha de visao sem paredes, dispara um projetil por vez e causa uma unidade de dano. Paredes bloqueiam os tiros; unidades terrestres evitam as bordas. Nao ha ondas infinitas ou chefes novos. Os inimigos permanecem derrotados durante a partida e voltam ao reiniciar o laboratorio. Ao concluir a fase, o combate para. Ainda e necessario playtest humano para ajuste fino de dificuldade e animacoes.
+
+Validacao adicional:
+
+```text
+godot --headless --path . --script res://tests/security_units_smoke.gd
+```
+
+A suite de seguranca verifica 18 condicoes: quantidade, cinco animacoes de seis quadros, cobertura dos tipos, resistencias diferentes, aviso antes do tiro, tempo de reacao, disparo, dano, linha de visao, bloqueio por parede, voo, patrulha junto ao fosso e destruicao. A suite geral continua com 20 verificacoes. `tests/enemy_gallery.gd` gera uma imagem da familia de inimigos com renderizacao real do Godot.
