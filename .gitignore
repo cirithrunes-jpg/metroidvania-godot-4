@@ -1,2 +1,8 @@
 # Godot 4+ specific ignores
 .godot/
+
+# Local validation outputs
+.validation-profile/
+*.log
+*.gd.uid
+artifacts/
