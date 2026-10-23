@@ -2,6 +2,7 @@ extends World
 
 const CYAN := Color("28cfff")
 const RED := Color("f34e64")
+const BACKDROP = preload("res://prototype/assets/laboratory-wall-v3.png")
 const FLOORS := [Rect2(0,152,260,28), Rect2(300,152,310,28), Rect2(660,152,300,28), Rect2(184,120,60,8), Rect2(342,116,70,8), Rect2(446,80,74,8), Rect2(560,112,60,8), Rect2(704,114,70,8)]
 var player: CharacterBody2D
 var checkpoint := Vector2(36,148)
@@ -14,12 +15,23 @@ var health: Label
 
 func _enter_tree():
 	MainInstances.world = self
-	
+
 
 func _ready():
 	PlayerStats.reset()
 	WorldStash.data = {}
 	RenderingServer.set_default_clear_color(Color("090e17"))
+	var backdrop := Sprite2D.new()
+	backdrop.name = "LaboratoryBackdrop"
+	backdrop.texture = BACKDROP
+	backdrop.centered = false
+	backdrop.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	# Preserve proportions; the viewport crops the lower service wall behind the floors.
+	backdrop.scale = Vector2.ONE * (960.0 / BACKDROP.get_width())
+	backdrop.position = Vector2(0,-36)
+	backdrop.modulate = Color(0.72,0.77,0.84,1)
+	backdrop.z_index = -5
+	add_child(backdrop)
 	for rect in FLOORS:
 		var body := StaticBody2D.new()
 		var shape := CollisionShape2D.new()
@@ -140,18 +152,6 @@ func _unhandled_key_input(event):
 		get_tree().change_scene_to_file("res://menus/start_menu.tscn")
 
 func _draw():
-	draw_rect(Rect2(0,0,960,180),Color("0b111c"))
-	for x in range(0,960,48):
-		draw_rect(Rect2(x+2,35,44,110),Color("141f2c"))
-		draw_rect(Rect2(x+4,37,40,106),Color("101925"),false,1)
-		draw_line(Vector2(x+8,48),Vector2(x+38,48),Color("2d3b48"),2)
-		draw_circle(Vector2(x+8,138),1,Color("51606b"))
-	for x in [70,320,615,815]:
-		draw_rect(Rect2(x,69,28,72),Color("273944"))
-		draw_rect(Rect2(x+3,73,22,62),Color("123846"))
-		draw_rect(Rect2(x+6,78,16,3),CYAN)
-		draw_line(Vector2(x+14,86),Vector2(x+14,124),Color("366373"),5)
-		draw_circle(Vector2(x+14,91),6,Color("49656d"))
 	for rect in FLOORS:
 		draw_rect(rect,Color("303d49"))
 		draw_rect(Rect2(rect.position,Vector2(rect.size.x,2)),Color("8295a2"))
@@ -161,15 +161,14 @@ func _draw():
 		draw_rect(Rect2(x,170,50,10),RED)
 		for stripe in range(x,x+50,10):
 			draw_line(Vector2(stripe,170),Vector2(stripe+6,178),Color("251a27"),3)
-	for x in [32,260,530,790]:
-		draw_line(Vector2(x,33),Vector2(x+70,33),CYAN,2)
-		draw_colored_polygon(PackedVector2Array([Vector2(x,35),Vector2(x+70,35),Vector2(x+92,145),Vector2(x-22,145)]),Color(0.1,0.7,1,0.035))
-		draw_circle(Vector2(x+76,44),3,Color(1,0.16,0.25,0.5+sin(elapsed*3)*0.3))
+	for light in [Vector2(267,55),Vector2(755,59)]:
+		draw_circle(light,3,Color(1,0.16,0.25,0.08+sin(elapsed*3)*0.04))
 	draw_rect(Rect2(475,61,18,19),Color("224858"))
 	draw_rect(Rect2(478,64,12,8),CYAN if not relay else Color("a0ffda"))
 	draw_rect(Rect2(908,89,32,63),Color("233747"))
 	draw_rect(Rect2(912,93,24,59),CYAN if relay else RED,false,2)
 	var font := ThemeDB.fallback_font
+	draw_rect(Rect2(16,49,160,59),Color(0.025,0.04,0.065,0.84))
 	draw_string(font,Vector2(22,64),"CONTENCAO / 01",HORIZONTAL_ALIGNMENT_LEFT,-1,10,CYAN)
 	draw_string(font,Vector2(22,79),"A/D mover | W salto duplo",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("99abbc"))
 	draw_string(font,Vector2(22,91),"Mouse mira / clique atira",HORIZONTAL_ALIGNMENT_LEFT,-1,8,Color("99abbc"))
@@ -180,5 +179,5 @@ func _draw():
 func _exit_tree():
 	Music.audio_stream_player.stop()
 	MainInstances.world = null
-	
+
 

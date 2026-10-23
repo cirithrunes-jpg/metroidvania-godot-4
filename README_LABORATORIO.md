@@ -59,3 +59,7 @@ Tambem executado com renderizacao Compatibility/ANGLE e captura visual inspecion
 
 Arte e animacao integradas somente ao laboratorio. Origem e alternativas do GitHub documentadas em prototype/assets/ORIGEM_E_ALTERNATIVAS.md. Validacao com 18 verificacoes aprovadas no Godot 4.7.2 e captura visual inspecionada. O render do atlas usa filtro linear para evitar contornos serrilhados na ampliacao da janela. A personagem continua uma proposta artistica em evolucao.
 
+
+## Revisao do fundo v3
+
+O laboratorio agora usa um panorama original com texturas mais realistas de concreto, metal desgastado, dutos, cabos e janelas de contencao. A imagem preserva suas proporcoes e fica atras das plataformas e da personagem. As instrucoes receberam um painel escuro translucido para facilitar a leitura. Esta revisao altera apenas o visual do fundo; o percurso e suas colisoes foram preservados. Validacao: as mesmas 18 verificacoes passaram com renderizacao no Godot 4.7.2 e a captura dentro do jogo foi inspecionada.

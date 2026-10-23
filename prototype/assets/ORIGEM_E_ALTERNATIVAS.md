@@ -22,3 +22,7 @@ https://luizmelo.itch.io/huntress
 A pagina do autor declara CC0 e uso comercial. E uma personagem de fantasia; precisaria de adaptacao visual para a direcao industrial do projeto. Esta fonte e externa ao GitHub e nao foi integrada.
 
 Os assets que ja existiam na base do projeto permanecem com suas respectivas condicoes de uso; este documento registra somente a nova arte e as alternativas pesquisadas.
+
+## Fundo do laboratorio v3
+
+`laboratory-wall-v3.png`: panorama original gerado com a ferramenta de imagens da OpenAI em 23/10/2026 para este projeto. Inclui metal desgastado, concreto, tubulacoes, cabos e observatorios de laboratorio. Nao foi copiado de outro jogo nem de fonte externa. O fundo e uma imagem 2D; luzes e materiais estao pintados, sem simulacao fisica de materiais ou sombras dinamicas. A integracao preserva a proporcao do panorama, usa filtro linear e uma camada mais escura para manter a personagem e as plataformas legiveis. A geometria e as colisoes do percurso continuam as mesmas.
