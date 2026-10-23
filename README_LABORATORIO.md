@@ -63,3 +63,7 @@ Arte e animacao integradas somente ao laboratorio. Origem e alternativas do GitH
 ## Revisao do fundo v3
 
 O laboratorio agora usa um panorama original com texturas mais realistas de concreto, metal desgastado, dutos, cabos e janelas de contencao. A imagem preserva suas proporcoes e fica atras das plataformas e da personagem. As instrucoes receberam um painel escuro translucido para facilitar a leitura. Esta revisao altera apenas o visual do fundo; o percurso e suas colisoes foram preservados. Validacao: as mesmas 18 verificacoes passaram com renderizacao no Godot 4.7.2 e a captura dentro do jogo foi inspecionada.
+
+## Trilha sonora
+
+O laboratorio toca em loop a trilha `钢铁地牢 (2).mp3` fornecida pelo usuario, copiada para `prototype/assets/steel-dungeon-soundtrack.mp3`. O barramento Master foi reativado para a reproducao ser ouvida. Ao entrar na campanha original, a musica original volta a tocar. Validacao ampliada para 20 verificacoes, incluindo stream MP3 carregado e em reproducao, loop ativo, duracao valida, Master habilitado e preservacao da trilha original.

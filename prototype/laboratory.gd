@@ -3,6 +3,7 @@ extends World
 const CYAN := Color("28cfff")
 const RED := Color("f34e64")
 const BACKDROP = preload("res://prototype/assets/laboratory-wall-v3.png")
+const LAB_SOUNDTRACK = preload("res://prototype/assets/steel-dungeon-soundtrack.mp3")
 const FLOORS := [Rect2(0,152,260,28), Rect2(300,152,310,28), Rect2(660,152,300,28), Rect2(184,120,60,8), Rect2(342,116,70,8), Rect2(446,80,74,8), Rect2(560,112,60,8), Rect2(704,114,70,8)]
 var player: CharacterBody2D
 var checkpoint := Vector2(36,148)
@@ -71,7 +72,7 @@ func _ready():
 	status.add_theme_font_size_override("font_size",8)
 	canvas.add_child(status)
 	Events.player_died.connect(respawn)
-	Music.play(Music.main_theme)
+	Music.play(LAB_SOUNDTRACK)
 
 func spawn_player():
 	player = preload("res://player/player.tscn").instantiate()

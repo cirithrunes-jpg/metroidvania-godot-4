@@ -26,3 +26,7 @@ Os assets que ja existiam na base do projeto permanecem com suas respectivas con
 ## Fundo do laboratorio v3
 
 `laboratory-wall-v3.png`: panorama original gerado com a ferramenta de imagens da OpenAI em 23/10/2026 para este projeto. Inclui metal desgastado, concreto, tubulacoes, cabos e observatorios de laboratorio. Nao foi copiado de outro jogo nem de fonte externa. O fundo e uma imagem 2D; luzes e materiais estao pintados, sem simulacao fisica de materiais ou sombras dinamicas. A integracao preserva a proporcao do panorama, usa filtro linear e uma camada mais escura para manter a personagem e as plataformas legiveis. A geometria e as colisoes do percurso continuam as mesmas.
+
+## Trilha fornecida pelo usuario
+
+`steel-dungeon-soundtrack.mp3`: copia do arquivo `钢铁地牢 (2).mp3` fornecido pelo usuario e integrado a seu pedido ao laboratorio. O nome do arquivo foi simplificado dentro do projeto. Autoria e licenca nao foram informadas; este documento nao atribui uma licenca nova ao audio. Importacao Godot com loop habilitado a partir de 0 segundos. A campanha original mantem sua trilha anterior. O barramento Master foi reativado, pois estava silenciado na base.

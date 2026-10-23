@@ -24,6 +24,8 @@ func run():
 	await ticks(20)
 	check(is_instance_valid(scene.player), "player spawns")
 	check(scene.player.is_on_floor(), "spawn has solid floor")
+	var music = root.get_node("Music").audio_stream_player
+	check(music.stream is AudioStreamMP3 and music.stream.loop and music.playing and music.stream.get_length() > 0 and not AudioServer.is_bus_mute(0), "supplied soundtrack plays on loop with master enabled")
 	var art = scene.player.get_node("Specimen")
 	check(art.sprite_frames.get_frame_count("run") == 6, "female running cycle has six frames")
 	check(art.animation == "idle", "female sprite settles into idle")
@@ -80,6 +82,7 @@ func run():
 	current_scene._on_start_button_pressed()
 	await ticks(8)
 	check(current_scene.scene_file_path == "res://world.tscn", "original game still opens")
+	check(music.stream == root.get_node("Music").main_theme, "original game retains its own music")
 	print("RESULT: %d failures" % failures)
 	root.get_node("Music").audio_stream_player.stop()
 	await create_timer(0.1).timeout
