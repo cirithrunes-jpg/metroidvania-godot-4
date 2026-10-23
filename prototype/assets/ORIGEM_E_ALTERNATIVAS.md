@@ -42,3 +42,7 @@ A familia de seguranca usa a folha CC0 Space soldier, de drakzlin, como base edi
 Os novos tiros/impactos sao desenhados por codigo em `prototype/combat`, com rastros, faiscas e clarao; nao sao gravacoes nem simulacao fotorealista. A fonte usa SystemFont do Godot (Segoe UI, Arial ou DejaVu Sans, conforme disponivel no sistema), sem copiar ou redistribuir arquivos de fontes do Windows.
 
 O atlas antigo `player/player.png` e seu arquivo de importacao foram excluidos nesta revisao. A copia original permanece na branch de backup. A nova personagem continua usando o atlas feminino original ja documentado. O menu antigo nao e mais oferecido.
+
+## Biblioteca de poses
+
+`poses/combat.png`, `poses/mobility.png`, `poses/extras.png` e `poses/weapons.png`: novas artes originais geradas com a ferramenta de imagens da OpenAI em 23/10/2026 a partir do atlas existente da nossa personagem. Quatro conjuntos de acoes, incluindo movimentos, vista traseira, armas e poder de energia de linguagem anime. A folha com armas foi refeita com figuras menores para manter espadas e efeitos dentro do espaco de cada quadro. Nenhuma imagem de outra franquia foi usada como referencia. Os recortes e margens do Godot estao em `animations/actions.tres`, sem editar os pixels dos PNGs.

@@ -62,3 +62,7 @@ godot --headless --path . --script res://tests/ballistics_smoke.gd
 **58 verificacoes aprovadas:** 33 de campanha/controle/interface/portas, 18 de inimigos e 7 de balistica. A suite de campanha tambem foi executada com renderizacao Compatibility/ANGLE e suas capturas foram inspecionadas. Os testes posicionam a personagem diretamente para verificar transicoes e nao substituem um playtest humano completo dos saltos, da dificuldade e da animacao.
 
 Neste computador, o Godot informa falha de leitura do repositorio de certificados do sistema; o aviso tambem ocorre na base e nao impediu os testes locais offline. Nenhuma alteracao foi mesclada na main.
+
+## Biblioteca de poses e armas
+
+Em `prototype/animations/` ha uma biblioteca adicional com 16 sequencias/96 entradas de quadros: soco, chute, defesa, reacao a golpe, agachar, andar de quatro, rastejar, cair, costas, virar, rolamento, escalar, arma de fogo, espada, granada e energia. Abra `pose_preview.tscn` e F6 para visualizar. Este acrescimo fornece animacoes; as mecanicas de dano e de movimento correspondentes ainda nao foram ligadas ao controlador da campanha. Instrucoes em `prototype/animations/LEIA-ME.md`. Biblioteca validada com 25 verificacoes especificas.
