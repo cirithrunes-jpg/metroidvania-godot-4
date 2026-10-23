@@ -65,8 +65,27 @@ func spawn_player():
 	player = preload("res://player/player.tscn").instantiate()
 	player.position = checkpoint
 	add_child(player)
+	# Match the taller silhouette only in the laboratory; preserve the original scene.
+	for path in ["CollisionShape2D", "Hurtbox/CollisionShape2D"]:
+		var collider = player.get_node(path)
+		collider.shape = collider.shape.duplicate()
+		collider.shape.size = Vector2(10,26)
+		collider.position = Vector2(0,-13)
+	player.get_node("Sprite2D/RemoteTransform2D").position = Vector2(2,-4)
+	var blaster = player.get_node("PlayerBlaster/BlasterSprite")
+	blaster.self_modulate.a = 0
+	var weapon := Polygon2D.new()
+	weapon.polygon = PackedVector2Array([Vector2(-3,-2),Vector2(7,-2),Vector2(9,0),Vector2(7,2),Vector2(-3,2)])
+	weapon.color = Color("465e70")
+	blaster.add_child(weapon)
+	var seam := Line2D.new()
+	seam.points = PackedVector2Array([Vector2(0,-1),Vector2(7,-1)])
+	seam.width = 0.6
+	seam.default_color = CYAN
+	blaster.add_child(seam)
 	player.get_node("Sprite2D").self_modulate.a = 0
-	var art := Node2D.new()
+	var art := AnimatedSprite2D.new()
+	art.name = "Specimen"
 	art.set_script(preload("res://prototype/specimen.gd"))
 	art.actor = player
 	player.add_child(art)

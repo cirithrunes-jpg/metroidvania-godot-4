@@ -30,7 +30,7 @@ Na copia local, o projeto esta na pasta `Game`, junto deste documento.
 - Rele de energia que ativa um checkpoint durante a partida e libera a conclusao.
 - Queda devolve ao checkpoint e tira uma unidade de integridade, sem matar; morte por combate recria o jogador no checkpoint.
 - Paleta grafite, azul eletrico e vermelho de emergencia; tanques, paineis, luzes de alarme pulsantes e fachos desenhados em 2D.
-- Protagonista humanoide monstruoso com silhueta, garras, chifres e marcas luminosas. Arte vetorial procedural original, provisoria, animada conforme o movimento existente.
+- Protagonista feminina biomecanica com atlas original gerado, cabelo prateado e detalhes luminosos. Ciclo de corrida com seis quadros, repouso, subida, apice, queda, parede e aterrissagem, com respiracao e recuperacao de impacto suaves. Colisores do laboratorio ajustados a silhueta mais alta; cena original preservada.
 - Reaproveita o controlador, tiros, inimigos, efeitos e audio ja presentes no repositorio. Nenhum novo asset externo foi copiado ou baixado.
 - Cenas e scripts das tres fases originais mantidos. O menu recebeu acesso adicional ao prototipo.
 
@@ -51,6 +51,11 @@ godot --headless --editor --path . --quit
 godot --headless --path . --script res://tests/laboratory_smoke.gd
 ```
 
-O teste verifica 14 condicoes: nascimento, chao, movimento, salto, integracao dos disparos/efeitos, rele, queda, renascimento, checkpoint, pausa, retomada, conclusao, menu e abertura do jogo original. Nao substitui um playtest manual completo; os testes de progressao posicionam o personagem para exercitar cada transicao.
+O teste verifica 18 condicoes (incluindo quatro verificacoes da nova arte e animacao): nascimento, chao, movimento, salto, integracao dos disparos/efeitos, rele, queda, renascimento, checkpoint, pausa, retomada, conclusao, menu e abertura do jogo original. Nao substitui um playtest manual completo; os testes de progressao posicionam o personagem para exercitar cada transicao.
 
 Tambem executado com renderizacao Compatibility/ANGLE e captura visual inspecionada. Neste computador o Godot informa falha de leitura do repositorio de certificados do sistema; isso tambem aparece na base e nao impediu o teste local offline. Nenhuma alteracao foi mesclada na main.
+
+## Revisao da personagem v2
+
+Arte e animacao integradas somente ao laboratorio. Origem e alternativas do GitHub documentadas em prototype/assets/ORIGEM_E_ALTERNATIVAS.md. Validacao com 18 verificacoes aprovadas no Godot 4.7.2 e captura visual inspecionada. O render do atlas usa filtro linear para evitar contornos serrilhados na ampliacao da janela. A personagem continua uma proposta artistica em evolucao.
+

@@ -24,15 +24,20 @@ func run():
 	await ticks(20)
 	check(is_instance_valid(scene.player), "player spawns")
 	check(scene.player.is_on_floor(), "spawn has solid floor")
+	var art = scene.player.get_node("Specimen")
+	check(art.sprite_frames.get_frame_count("run") == 6, "female running cycle has six frames")
+	check(art.animation == "idle", "female sprite settles into idle")
 	var initial_x: float = scene.player.position.x
 	Input.action_press("move_right")
 	await ticks(40)
 	Input.action_release("move_right")
 	check(scene.player.position.x > initial_x + 20, "existing movement works")
+	check(art.animation == "run", "running animation follows movement")
 	Input.action_press("jump")
 	await ticks(8)
 	Input.action_release("jump")
 	check(scene.player.position.y < 140, "jump leaves floor")
+	check(art.animation in ["rise","apex","fall"], "airborne animation follows jump")
 	Input.action_press("fire")
 	await ticks(30)
 	Input.action_release("fire")
@@ -62,7 +67,10 @@ func run():
 		scene.finished = false
 		scene.relay = false
 		scene.player.position = Vector2(110,148)
+		scene.player.velocity = Vector2.ZERO
+		scene.player.process_mode = Node.PROCESS_MODE_INHERIT
 		scene.player.get_node("Camera2D").reset_smoothing()
+		await ticks(24)
 		await process_frame
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://artifacts/laboratorio-preview.png")
