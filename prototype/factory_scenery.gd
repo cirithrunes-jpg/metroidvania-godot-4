@@ -8,32 +8,23 @@ const WALL = preload("res://prototype/assets/laboratory-wall-v3.png")
 func _ready():
 	z_index = 20 if foreground else -4
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	if foreground: return
-	var texture: Texture2D = WALL
-	if ResourceLoader.exists("res://prototype/assets/corridor-backgrounds.png"):
-		var atlas := AtlasTexture.new()
-		atlas.atlas = load("res://prototype/assets/corridor-backgrounds.png")
-		var height := atlas.atlas.get_height()/3.0
-		atlas.region = Rect2(0,(sector-1)*height,atlas.atlas.get_width(),height)
-		texture = atlas
-	for tile in 2:
-		var wall := Sprite2D.new()
-		wall.z_index = -1
-		wall.texture = texture
-		wall.centered = false
-		wall.position = Vector2(tile*960,0)
-		wall.scale = Vector2(960.0/texture.get_width(),360.0/texture.get_height())
-		wall.modulate = Color(0.65,0.70,0.76)
-		add_child(wall)
+	if foreground:
+		add_depth(2,1.12,0)
+		return
+	add_depth(0,0.25,0)
+	add_depth(1,0.60,1)
+
+func add_depth(band: int,depth: float,order: int):
+	var layer := Node2D.new()
+	layer.set_script(preload("res://prototype/visual_depth.gd"))
+	layer.band = band
+	layer.depth = depth
+	layer.sector = sector
+	layer.z_index = order
+	add_child(layer)
 
 func _draw():
-	if foreground:
-		for x in [320,705,1175,1585]:
-			draw_rect(Rect2(x-2,0,12,348),Color(0.025,0.04,0.055,0.9))
-			draw_texture_rect_region(STEEL,Rect2(x,0,6,348),Rect2(200,100,80,500),Color(0.3,0.36,0.4,0.9))
-			draw_line(Vector2(x,0),Vector2(x,348),Color("617482"),0.6)
-			for y in range(24,340,48): draw_circle(Vector2(x+3,y),0.8,Color("8f999e"))
-		return
+	if foreground: return
 	for x in range(60+sector*35,1920,230):
 		draw_rect(Rect2(x,12,9,280),Color("17242e"))
 		draw_line(Vector2(x,30),Vector2(x+150,110+sector*15),Color("263a45"),5)

@@ -50,6 +50,7 @@ func _ready():
 			item.pressed.connect(func(): begin_capture(action,kind))
 			row.add_child(item)
 			rows[action][kind] = item
+			if action=="jump" and kind=="pad": item.disabled = true
 			if index==0 and kind=="key": first = item
 	status = label(ui,"Conflitos trocam os comandos. Esc cancela a captura. Analógico e gatilhos são aceitos.",Vector2(80,588),20)
 	button(ui,"Restaurar padrão",Vector2(80,640),Vector2(330,52),reset_defaults)
@@ -74,8 +75,11 @@ func button(parent: Node,text: String,point: Vector2,size: Vector2,action: Calla
 	return item
 func refresh():
 	for action in CombatInput.ACTIONS:
-		for kind in ["key","pad"]: rows[action][kind].text = CombatInput.describe(action,kind)
+		for kind in ["key","pad"]: rows[action][kind].text = "FIXO: A / ✕" if action=="jump" and kind=="pad" else CombatInput.describe(action,kind)
 func begin_capture(action: String,kind: String):
+	if action=="jump" and kind=="pad":
+		status.text = "X/cruz (A no Xbox) é fixo para pular."
+		return
 	waiting_action = action
 	waiting_kind = kind
 	capture_delay = 0.18

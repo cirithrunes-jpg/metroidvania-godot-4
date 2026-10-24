@@ -28,6 +28,7 @@ var unit_scale := 0.128
 
 func _ready():
 	add_to_group("lab_enemies")
+	collision_mask |= 128
 	origin = position
 	health = HEALTH[kind]
 	cooldown += float(kind)*0.3

@@ -31,7 +31,7 @@ func _ready():
 	add_old("wall",2,[5],1,false)
 	add_old("land",3,[0,1,2,3,4,5],24,false)
 	var actions = preload("res://prototype/animations/actions.tres")
-	for action in ["punch","kick","sword","grenade","energy","crouch","prone_crawl","climb"]:
+	for action in ["sword","grenade","energy","crouch","prone_crawl","climb"]:
 		sprite_frames.add_animation(action)
 		sprite_frames.set_animation_speed(action,14)
 		sprite_frames.set_animation_loop(action,false)
@@ -47,6 +47,26 @@ func _ready():
 	sprite_frames.set_animation_speed("air_kick",14)
 	sprite_frames.set_animation_loop("air_kick",false)
 	for i in aerial.get_frame_count("air_kick"): sprite_frames.add_frame("air_kick",aerial.get_frame_texture("air_kick",i))
+	var melee_library = preload("res://prototype/animations/melee_v11.tres")
+	for action in ["punch","kick"]:
+		sprite_frames.add_animation(action)
+		sprite_frames.set_animation_speed(action,melee_library.get_animation_speed(action))
+		sprite_frames.set_animation_loop(action,false)
+		for i in melee_library.get_frame_count(action): sprite_frames.add_frame(action,melee_library.get_frame_texture(action,i))
+	var specials = preload("res://prototype/animations/special_melee_v12.tres")
+	for action in ["uppercut","reverse_kick","double_kick"]:
+		sprite_frames.add_animation(action)
+		sprite_frames.set_animation_speed(action,specials.get_animation_speed(action))
+		sprite_frames.set_animation_loop(action,false)
+		for i in specials.get_frame_count(action): sprite_frames.add_frame(action,specials.get_frame_texture(action,i))
+	sprite_frames.add_animation("somersault")
+	sprite_frames.set_animation_speed("somersault",9)
+	sprite_frames.set_animation_loop("somersault",false)
+	for i in [1,2,3,4]: sprite_frames.add_frame("somersault",actions.get_frame_texture("roll",i))
+	sprite_frames.add_animation("ladder_climb")
+	sprite_frames.set_animation_speed("ladder_climb",10)
+	sprite_frames.set_animation_loop("ladder_climb",true)
+	for i in actions.get_frame_count("climb"): sprite_frames.add_frame("ladder_climb",actions.get_frame_texture("climb",i))
 	play("idle")
 func add_combat(label: String,row: int,columns: Array,fps: float,looped: bool):
 	sprite_frames.add_animation(label)
@@ -87,9 +107,7 @@ func _process(delta):
 		else: target = "armed_fall"
 	elif absf(actor.velocity.x)>5: target = "armed_run"
 	elif actor.armed_time>0: target = "rifle"
-	if actor.posture=="crouch" and grounded:
-		if was_posture!="crouch": play("crouch_enter")
-		target = "crouch_enter" if animation=="crouch_enter" and is_playing() else "crouch_hold"
+	if actor.posture=="crouch" and grounded: target = "crouch_hold"
 	elif actor.posture=="prone" and grounded: target = "prone_crawl" if absf(actor.velocity.x)>1 else "prone_idle"
 	if actor.power_charge>0: target = "energy_charge"
 	elif actor.power_cast>0: target = "energy_release"
@@ -104,10 +122,26 @@ func _process(delta):
 				play("guard_raise")
 			target = "guard_raise" if animation=="guard_raise" and is_playing() else "guard"
 	else: guard_started = false
+	if actor.somersault_time>0: target = "somersault"
 	if actor.melee_time>0: target = actor.melee_kind
+	if actor.climbing: target = "ladder_climb"
 	if target!=animation:
 		stop()
 		play(target)
+	apply_visuals(target)
+	var breath := sin(clock*2.4)*0.004 if target=="idle" else 0.0
+	scale.y *= 1+breath
+	speed_scale = 1
+	if target=="armed_run": speed_scale = clampf(absf(actor.velocity.x)/72,0.35,1.15)
+	elif target=="ladder_climb": speed_scale = 1 if absf(Input.get_axis("climb_up","posture_down"))>0.05 else 0
+	modulate = actor.get_node("Sprite2D").modulate
+	if actor.guard_impact>0: modulate = Color(1.3,1.7,2)
+	was_posture = actor.posture
+	was_grounded = grounded
+
+func apply_visuals(target: String):
+	position = Vector2.ZERO
+	rotation = 0
 	var old_pose: bool = target in ["rise","apex","fall","wall","land"]
 	var melee: bool = target in ["punch","kick","sword","grenade","energy","energy_charge","energy_release","prone_crawl","prone_idle","crouch_enter","crouch_hold"]
 	offset = Vector2(-128,-256) if old_pose else Vector2(-256,-352)
@@ -117,10 +151,41 @@ func _process(delta):
 	if target=="air_kick":
 		offset = Vector2(-300,-580)
 		size = 0.072
-	var breath := sin(clock*2.4)*0.004 if target=="idle" else 0.0
-	scale = Vector2(actor.facing*size*(1+squash*0.5),size*(1-squash+breath))
-	speed_scale = clampf(absf(actor.velocity.x)/72,0.35,1.15) if target=="armed_run" else 1.0
-	modulate = actor.get_node("Sprite2D").modulate
-	if actor.guard_impact>0: modulate = Color(1.3,1.7,2)
-	was_posture = actor.posture
-	was_grounded = grounded
+	if target in ["punch","kick","uppercut","reverse_kick","double_kick"]:
+		offset = Vector2(-384,-480)
+		size = 0.095
+		if target in ["uppercut","reverse_kick","double_kick"]: size = 0.105
+		if target=="double_kick": position.y = -10*sin(PI*clampf(actor.melee_elapsed/0.72,0,1))
+	elif target=="somersault":
+		offset = Vector2(-256,-280)
+		position = Vector2(0,-14)
+		size = 0.12
+		rotation = actor.facing*TAU*clampf(1-actor.somersault_time/0.48,0,1)
+	elif target=="ladder_climb": size = 0.132
+	scale = Vector2(actor.facing*size*(1+squash*0.5),size*(1-squash))
+
+const MUZZLE_RUN := [[229,312],[462,313],[683,319],[900,314],[1132,313],[1366,313],[1579,313]]
+const MUZZLE_RIFLE := [[202,510],[419,518],[635,508],[852,514],[1089,504],[1305,513],[1524,513]]
+func prepare_weapon_muzzle() -> Vector2:
+	var target := "rifle"
+	if not actor.is_on_floor(): target = "armed_rise" if actor.velocity.y<0 else "armed_fall"
+	elif absf(actor.velocity.x)>5: target = "armed_run"
+	if target=="rifle" or animation!=target:
+		stop()
+		play(target)
+	apply_visuals(target)
+	return muzzle_global_position()
+func muzzle_global_position() -> Vector2:
+	var column := 0
+	var point := Vector2.ZERO
+	if animation=="armed_run":
+		column = [0,1,2,3,4,5,6,3][frame]
+		point = Vector2(MUZZLE_RUN[column][0],MUZZLE_RUN[column][1])
+	elif animation in ["armed_rise","armed_fall"]:
+		column = 2 if animation=="armed_rise" else 3
+		point = Vector2(MUZZLE_RUN[column][0],MUZZLE_RUN[column][1])
+	else:
+		column = [4,5,6,3][frame] if animation=="rifle" else 0
+		point = Vector2(MUZZLE_RIFLE[column][0],MUZZLE_RIFLE[column][1])
+	var texture: AtlasTexture = sprite_frames.get_frame_texture(animation,frame)
+	return to_global(offset+texture.margin.position+point-texture.region.position)

@@ -71,14 +71,15 @@ func refresh_bindings():
 	var names := []
 	for action in ["move_left","move_right","jump","fire","attack_punch","attack_kick","guard","power","grenade","sword","posture_down"]:
 		names.append(CombatInput.describe(action,"key").split(", ")[0])
-	hint.text = "%s/%s mover · %s salto · %s tiro · %s soco · %s chute · %s defesa\n%s poder (2s) · %s granada · %s espada · %s postura (3s/6s) · Esc: pausa/controles" % names
+	hint.text = "%s/%s mover · %s salto · %s tiro · %s soco · %s chute · %s defesa\n%s poder (2s) · %s granada · %s espada · %s agachar / deitar (1s) · Esc: pausa/controles" % names
 
 func update_abilities(actor):
 	if actor.standing_blocked and actor.posture!="standing": ability.text = "SEM ESPAÇO PARA LEVANTAR"
 	elif actor.power_charge>0: ability.text = "PODER: %.1f / 2s" % actor.power_charge
 	elif actor.power_cast>0: ability.text = "PODER LIBERADO"
-	elif actor.down_hold>0 and actor.down_hold<3: ability.text = "AGACHAR: %.1f / 3s" % actor.down_hold
-	elif actor.down_hold>=3 and actor.down_hold<6: ability.text = "DEITAR: %.1f / 6s" % actor.down_hold
+	elif actor.climbing: ability.text = "ESCADA ↑/↓ · X/CRUZ: PULO"
+	elif actor.somersault_time>0: ability.text = "SALTO DUPLO · CAMBALHOTA"
+	elif actor.down_hold>0 and actor.down_hold<1: ability.text = "DEITAR: %.1f / 1s" % actor.down_hold
 	elif actor.posture!="standing": ability.text = "PULO PARA LEVANTAR"
 	elif actor.grenade_cooldown>0: ability.text = "GRANADA: %.1fs" % actor.grenade_cooldown
 	else: ability.text = "PODER: %s (2s)" % CombatInput.describe("power","pad")

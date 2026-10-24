@@ -117,6 +117,7 @@ interact={
 2d_physics/layer_5="PlayerHurtbox"
 2d_physics/layer_6="EnemyHurtbox"
 2d_physics/layer_7="BreakableProps"
+2d_physics/layer_8="EnemySafetyRails"
 
 [rendering]
 

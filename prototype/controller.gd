@@ -10,8 +10,18 @@ var shield_hits := 0
 var shield_recovery := 0.0
 var stagger := 0.0
 var melee_kind := ""
+var punch_chain := 0
+var kick_chain := 0
+var chain_timeout := 0.0
 var melee_time := 0.0
 var melee_hit := false
+var melee_elapsed := 0.0
+var melee_hits := 0
+var somersault_time := 0.0
+var climbing := false
+var active_ladder := {}
+var ladder_jump_consumed := false
+var ladder_lock := 0.0
 var armed_time := 0.0
 var guard_impact := 0.0
 var posture := "standing"
@@ -74,7 +84,7 @@ func stand_up() -> bool:
 
 func melee_strike():
 	var sword := melee_kind=="sword"
-	var kick: bool = melee_kind in ["kick","air_kick"]
+	var kick: bool = melee_kind in ["kick","air_kick","reverse_kick","double_kick"]
 	var query := PhysicsShapeQueryParameters2D.new()
 	var box := RectangleShape2D.new()
 	box.size = Vector2(44 if sword else (32 if kick else 24),25)
@@ -107,7 +117,49 @@ func throw_grenade():
 	grenade.global_position = global_position+Vector2(0,-18)
 	grenade.velocity = Vector2(facing*105,-85)
 
+func leave_ladder():
+	climbing = false
+	active_ladder = {}
+	collision_mask = 3
+
+func update_ladder(delta: float) -> bool:
+	var vertical := Input.get_axis("climb_up","posture_down")
+	if climbing and (stagger>0 or not is_instance_valid(MainInstances.world)):
+		leave_ladder()
+		return false
+	if climbing and Input.is_action_just_pressed("jump"):
+		ladder_jump_consumed = true
+		ladder_lock = 0.3
+		leave_ladder()
+		velocity = Vector2(Input.get_axis("move_left","move_right")*72,-jump_force)
+		extra_jump = true
+		return false
+	if not climbing and ladder_lock<=0 and absf(vertical)>0 and stagger<=0 and not guarding and melee_time<=0 and power_cast<=0 and power_charge<=0 and grenade_time<=0:
+		var structure = MainInstances.world.get("structure") if is_instance_valid(MainInstances.world) else null
+		if is_instance_valid(structure):
+			var ladder: Dictionary = structure.ladder_at(global_position,vertical)
+			if not ladder.is_empty() and (posture=="standing" or stand_up()):
+				climbing = true
+				active_ladder = ladder
+				collision_mask = 0
+				somersault_time = 0
+	if not climbing: return false
+	velocity = Vector2.ZERO
+	global_position.x = move_toward(global_position.x,float(active_ladder.x),65*delta)
+	global_position.y = clampf(global_position.y+vertical*42*delta,float(active_ladder.top)-0.2,float(active_ladder.bottom)-0.2)
+	if (vertical<0 and global_position.y<=float(active_ladder.top)+0.1) or (vertical>0 and global_position.y>=float(active_ladder.bottom)-0.4):
+		leave_ladder()
+		velocity.y = 0
+	sprite_2d.scale.x = facing
+	return true
+
 func _physics_process(delta):
+	chain_timeout = maxf(0,chain_timeout-delta)
+	if chain_timeout<=0:
+		punch_chain = 0
+		kick_chain = 0
+	ladder_lock = maxf(0,ladder_lock-delta)
+	somersault_time = maxf(0,somersault_time-delta)
 	armed_time = maxf(0,armed_time-delta)
 	guard_impact = maxf(0,guard_impact-delta)
 	power_cast = maxf(0,power_cast-delta)
@@ -116,7 +168,12 @@ func _physics_process(delta):
 	shot_delay = maxf(0,shot_delay-delta)
 	invulnerability = maxf(0,invulnerability-delta)
 	hurtbox.is_invincible = invulnerability>0
+	ladder_jump_consumed = false
+	if update_ladder(delta):
+		queue_redraw()
+		return
 	var grounded := is_on_floor()
+	if grounded: somersault_time = 0
 	var axis := Input.get_axis("move_left","move_right")
 	if absf(axis)>0 and stagger<=0 and power_charge<=0: facing = signf(axis)
 	if shield_recovery>0:
@@ -126,11 +183,11 @@ func _physics_process(delta):
 	if not guarding and shield_hits>0 and shield_recovery<=0: shield_recovery = 1.4
 	if grounded and stagger<=0 and Input.is_action_pressed("posture_down") and not guarding and melee_time<=0 and power_charge<=0 and power_cast<=0 and grenade_time<=0:
 		down_hold += delta
-		if down_hold+0.0001>=6 and posture!="prone": set_posture("prone")
-		elif down_hold+0.0001>=3 and posture=="standing": set_posture("crouch")
+		if posture=="standing": set_posture("crouch")
+		if down_hold+0.0001>=1 and posture!="prone": set_posture("prone")
 	else: down_hold = 0
 	jump_buffer = maxf(0,jump_buffer-delta)
-	if Input.is_action_just_pressed("jump") and stagger<=0:
+	if Input.is_action_just_pressed("jump") and stagger<=0 and not ladder_jump_consumed:
 		if posture=="standing" or stand_up(): jump_buffer = 0.12
 	grace = 0.1 if grounded else maxf(0,grace-delta)
 	if grounded: extra_jump = true
@@ -151,8 +208,18 @@ func _physics_process(delta):
 		elif Input.is_action_just_pressed("sword") or Input.is_action_just_pressed("attack_punch") or Input.is_action_just_pressed("attack_kick"):
 			melee_kind = "sword" if Input.is_action_just_pressed("sword") else ("kick" if Input.is_action_just_pressed("attack_kick") else "punch")
 			if melee_kind=="kick" and (not grounded or jump_buffer>0): melee_kind = "air_kick"
-			melee_time = 0.44
+			elif melee_kind=="kick":
+				melee_kind = ["kick","reverse_kick","double_kick"][kick_chain%3]
+				kick_chain += 1
+			elif melee_kind=="punch":
+				melee_kind = "punch" if punch_chain%2==0 else "uppercut"
+				punch_chain += 1
+			chain_timeout = 2.2
+			melee_time = 0.8 if melee_kind=="punch" else (0.72 if melee_kind in ["kick","uppercut","reverse_kick","double_kick"] else 0.44)
+			melee_elapsed = 0
+			melee_hits = 0
 			melee_hit = false
+			somersault_time = 0
 	if grenade_time>0:
 		grenade_time = maxf(0,grenade_time-delta)
 		if grenade_time<0.24 and not grenade_thrown:
@@ -160,13 +227,19 @@ func _physics_process(delta):
 			throw_grenade()
 	if melee_time>0:
 		melee_time = maxf(0,melee_time-delta)
-		if melee_time<0.26 and not melee_hit:
+		melee_elapsed += delta
+		var windows := [0.22,0.54] if melee_kind=="punch" else ([0.36] if melee_kind in ["uppercut","reverse_kick","double_kick"] else ([0.32] if melee_kind=="kick" else [0.18]))
+		if melee_hits<windows.size() and melee_elapsed+0.0001>=windows[melee_hits]:
+			melee_hits += 1
 			melee_hit = true
 			melee_strike()
 		if melee_time<=0: melee_kind = ""
 	if guarding or power_charge>0 or power_cast>0 or grenade_time>0 or (melee_time>0 and grounded): axis = 0
 	var speed: float = max_velocity
-	if posture=="crouch": speed = 22
+	if posture=="crouch":
+		speed = 0
+		axis = 0
+		if stagger<=0: velocity.x = 0
 	elif posture=="prone": speed = 14
 	var response: float = acceleration if absf(axis)>0 else friction
 	if not grounded: response = 260 if absf(axis)>0 else 100
@@ -183,13 +256,14 @@ func _physics_process(delta):
 		elif extra_jump:
 			velocity.y = -118
 			extra_jump = false
+			somersault_time = 0.48
 			jump_buffer = 0
 	if is_on_wall() and velocity.y>44: velocity.y = 44
 	move_and_slide()
 	sprite_2d.scale.x = facing
 	sprite_2d.modulate = Color(1,0.65,0.6,0.55 if sin(invulnerability*35)>0 else 1) if invulnerability>0 else Color.WHITE
 	player_blaster.visible = false
-	if Input.is_action_pressed("fire") and shot_delay<=0 and not guarding and melee_time<=0 and grenade_time<=0 and power_charge<=0 and power_cast<=0 and stagger<=0 and posture=="standing":
+	if Input.is_action_pressed("fire") and shot_delay<=0 and not guarding and melee_time<=0 and grenade_time<=0 and power_charge<=0 and power_cast<=0 and stagger<=0 and posture=="standing" and somersault_time<=0:
 		armed_time = 0.28
 		player_blaster.fire_bullet()
 		shot_delay = 0.17
@@ -218,6 +292,8 @@ func _on_hurtbox_hurt(_hitbox,damage):
 		stagger = 0.35
 		velocity = Vector2(-facing*120,-65)
 	power_charge = 0
+	somersault_time = 0
+	if climbing: leave_ladder()
 	invulnerability = 0.9
 	hurtbox.is_invincible = true
 	PlayerStats.health -= damage

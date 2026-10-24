@@ -30,7 +30,7 @@ func explode():
 	effect.set_script(preload("res://prototype/combat/ability_fx.gd"))
 	get_parent().add_child(effect)
 	effect.global_position = global_position
-	Events.add_screenshake.emit(0.35,0.12)
+	Events.add_screenshake.emit(0.9,0.2)
 	queue_free()
 func _draw():
 	draw_circle(Vector2.ZERO,2.5,Color("49636e"))

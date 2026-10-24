@@ -61,6 +61,7 @@ func run():
 	await ticks(2)
 	Input.action_release("jump")
 	check(scene.player.velocity.y < -95,"double jump responds")
+	await ticks(34) # Wait for the double-jump somersault to finish before firing.
 	scene.player.get_node("PlayerBlaster").fire_bullet()
 	await ticks(1)
 	check(get_nodes_in_group("player_rounds").size()>0,"new ballistic projectile spawns")

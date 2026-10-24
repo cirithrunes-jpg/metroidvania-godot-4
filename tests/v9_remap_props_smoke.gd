@@ -50,7 +50,7 @@ func run():
 	current_scene.open_controls()
 	await ticks(3)
 	var settings = current_scene.settings
-	check(settings.rows.size()==15,"all fifteen actions can be configured")
+	check(settings.rows.size()==16,"all sixteen actions can be configured")
 	check(settings.rows.fire.key.text.contains("Z"),"current keyboard binding is displayed")
 	await capture("res://artifacts/settings-v9.png")
 	settings.begin_capture("fire","key")
@@ -63,9 +63,9 @@ func run():
 	check(contains("fire",key(KEY_Z)),"back without saving restores original commands")
 	mapping.assign("fire",key(KEY_K))
 	check(contains("fire",key(KEY_K)) and contains("attack_kick",key(KEY_Z)),"conflicting keyboard bindings swap actions")
-	mapping.assign("fire",pad(JOY_BUTTON_DPAD_UP))
-	check(contains("fire",pad(JOY_BUTTON_DPAD_UP)) and contains("jump",pad(JOY_BUTTON_RIGHT_SHOULDER)),"conflicting gamepad buttons swap actions")
-	check(mapping.describe("fire","pad").contains("↑"),"gamepad label includes PlayStation symbol")
+	mapping.assign("fire",pad(JOY_BUTTON_Y))
+	check(contains("fire",pad(JOY_BUTTON_Y)) and contains("attack_kick",pad(JOY_BUTTON_RIGHT_SHOULDER)),"conflicting gamepad buttons swap actions")
+	check(mapping.describe("fire","pad").contains("△"),"gamepad label includes PlayStation symbol")
 	var axis := InputEventJoypadMotion.new()
 	axis.axis = JOY_AXIS_TRIGGER_LEFT
 	axis.axis_value = 1
@@ -90,7 +90,7 @@ func run():
 	check(scene.paused,"escape opens pause even after remapping")
 	scene.pause_menu.show_controls()
 	await ticks(2)
-	check(is_instance_valid(scene.pause_menu.controls) and scene.pause_menu.controls.rows.size()==15,"pause opens same remapping screen")
+	check(is_instance_valid(scene.pause_menu.controls) and scene.pause_menu.controls.rows.size()==16,"pause opens same remapping screen")
 	scene.pause_menu.controls.begin_capture("fire","pad")
 	scene.pause_menu.controls.capture_delay = 0
 	Input.parse_input_event(pad(JOY_BUTTON_START))

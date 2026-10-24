@@ -24,6 +24,7 @@ var hud: CanvasLayer
 var exit_door: Node2D
 var pause_menu: CanvasLayer
 var relay_label: Label
+var structure: Node2D
 
 func _enter_tree():
 	MainInstances.world = self
@@ -56,6 +57,11 @@ func _ready():
 		scenery.sector = sector
 		scenery.foreground = front
 		add_child(scenery)
+	structure = Node2D.new()
+	structure.name = "FactoryStructure"
+	structure.set_script(preload("res://prototype/factory_structure.gd"))
+	structure.floors = floors
+	add_child(structure)
 	for rect in floors:
 		var body := StaticBody2D.new()
 		var shape := CollisionShape2D.new()
