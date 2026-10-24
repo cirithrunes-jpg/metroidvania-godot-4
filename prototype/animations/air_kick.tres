@@ -1,0 +1,67 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://prototype/assets/poses/air-kick-v10.png" id="1_xefvh"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sfhdm"]
+atlas = ExtResource("1_xefvh")
+region = Rect2(0, 0, 512, 512)
+margin = Rect2(55, 80, 256, 128)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_olg4j"]
+atlas = ExtResource("1_xefvh")
+region = Rect2(512, 0, 512, 512)
+margin = Rect2(77, 80, 256, 128)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_odycg"]
+atlas = ExtResource("1_xefvh")
+region = Rect2(1024, 0, 512, 512)
+margin = Rect2(144, 80, 256, 128)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xtmd4"]
+atlas = ExtResource("1_xefvh")
+region = Rect2(0, 512, 660, 512)
+margin = Rect2(70, 82, 108, 128)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_70u6p"]
+atlas = ExtResource("1_xefvh")
+region = Rect2(660, 512, 440, 512)
+margin = Rect2(135, 82, 328, 128)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m12h4"]
+atlas = ExtResource("1_xefvh")
+region = Rect2(1100, 512, 436, 512)
+margin = Rect2(115, 82, 332, 128)
+filter_clip = true
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sfhdm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_olg4j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_odycg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xtmd4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_70u6p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m12h4")
+}],
+"loop": 0,
+"name": &"air_kick",
+"speed": 14.0
+}]
+metadata/foot_anchor = Vector2(300, 580)
+metadata/draw_scale = 0.072

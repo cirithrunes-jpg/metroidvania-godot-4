@@ -1,0 +1,67 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://prototype/assets/poses/extras.png" id="1_jgw5y"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2hqsm"]
+atlas = ExtResource("1_jgw5y")
+region = Rect2(109, 748, 106, 267)
+margin = Rect2(237, 88, 406, 117)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g2bad"]
+atlas = ExtResource("1_jgw5y")
+region = Rect2(359, 738, 117, 274)
+margin = Rect2(231, 78, 395, 110)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_av60g"]
+atlas = ExtResource("1_jgw5y")
+region = Rect2(594, 739, 123, 275)
+margin = Rect2(210, 79, 389, 109)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uo2nv"]
+atlas = ExtResource("1_jgw5y")
+region = Rect2(840, 743, 122, 271)
+margin = Rect2(200, 83, 390, 113)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rglm5"]
+atlas = ExtResource("1_jgw5y")
+region = Rect2(1096, 738, 114, 276)
+margin = Rect2(200, 78, 398, 108)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g1kfo"]
+atlas = ExtResource("1_jgw5y")
+region = Rect2(359, 738, 117, 274)
+margin = Rect2(231, 78, 395, 110)
+filter_clip = true
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2hqsm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g2bad")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_av60g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uo2nv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rglm5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g1kfo")
+}],
+"loop": 1,
+"name": &"ladder_back",
+"speed": 10.0
+}]
+metadata/foot_anchor = Vector2(256, 352)
+metadata/draw_scale = 0.132
