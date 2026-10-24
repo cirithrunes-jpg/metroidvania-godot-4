@@ -6,3 +6,6 @@
 *.log
 *.gd.uid
 artifacts/
+
+# User-provided introduction stays local until public sharing is approved
+prototype/assets/video/
