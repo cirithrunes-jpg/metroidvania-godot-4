@@ -22,6 +22,7 @@ var paused := false
 var elapsed := 0.0
 var hud: CanvasLayer
 var exit_door: Node2D
+var pause_menu: CanvasLayer
 
 func _enter_tree():
 	MainInstances.world = self
@@ -73,16 +74,32 @@ func _ready():
 		wall.position = Vector2(x,0)
 		wall.add_child(collision)
 		add_child(wall)
+	var record: Dictionary = CampaignSave.pending
+	CampaignSave.pending = {}
+	if not record.is_empty() and int(record.sector)==sector:
+		relay = record.relay
+		if relay: checkpoint = relay_checkpoint
+		PlayerStats.health = int(record.health)
 	spawn_player()
+	if not record.is_empty(): player.facing = float(record.get("facing",1))
 	for index in deployment.size():
 		var enemy = preload("res://prototype/enemies/security_unit.tscn").instantiate()
+		if not record.is_empty() and not record.units.has(str(index)):
+			enemy.free()
+			continue
+		enemy.spawn_id = index
 		enemy.kind = [0,0,2,1,0,2,0,4,1,3,2][index]
 		enemy.position = deployment[index]
 		enemy.patrol_radius = 16.0 if index == 1 else 20.0
 		add_child(enemy)
+		if not record.is_empty(): enemy.health = clampi(int(record.units[str(index)]),1,enemy.HEALTH[enemy.kind])
 	hud = CanvasLayer.new()
 	hud.set_script(preload("res://prototype/ui/campaign_hud.gd"))
 	add_child(hud)
+	pause_menu = CanvasLayer.new()
+	pause_menu.set_script(preload("res://prototype/ui/pause_menu.gd"))
+	pause_menu.world = self
+	add_child(pause_menu)
 	exit_door = Node2D.new()
 	exit_door.set_script(preload("res://prototype/pressure_door.gd"))
 	exit_door.position = door_point
@@ -107,16 +124,6 @@ func spawn_player():
 	player = preload("res://prototype/player.tscn").instantiate()
 	player.position = checkpoint
 	add_child(player)
-	var blaster = player.get_node("PlayerBlaster/BlasterSprite")
-	var weapon := Polygon2D.new()
-	weapon.polygon = PackedVector2Array([Vector2(-3,-2),Vector2(7,-2),Vector2(7,-1),Vector2(10,-1),Vector2(10,1),Vector2(6,1),Vector2(5,3),Vector2(2,3),Vector2(2,1),Vector2(-3,1)])
-	weapon.color = Color("435663")
-	blaster.add_child(weapon)
-	var seam := Line2D.new()
-	seam.points = PackedVector2Array([Vector2(0,-1),Vector2(8,-1)])
-	seam.width = 0.5
-	seam.default_color = CYAN
-	blaster.add_child(seam)
 	var camera: Camera2D = player.get_node("Camera2D")
 	camera.limit_left = 0
 	camera.limit_right = corridor_width
@@ -166,6 +173,7 @@ func begin_transition():
 func toggle_pause():
 	if finished: return
 	paused = not paused
+	pause_menu.show_pause(paused)
 	for child in get_children():
 		if child is Node2D: child.process_mode = Node.PROCESS_MODE_DISABLED if paused else Node.PROCESS_MODE_INHERIT
 
@@ -173,7 +181,7 @@ func _unhandled_input(event):
 	if event.is_action_pressed("pause") and not event.is_echo(): toggle_pause()
 
 func _unhandled_key_input(event):
-	if not event.pressed or event.echo or transitioning: return
+	if not event.pressed or event.echo or transitioning or paused: return
 	if event.physical_keycode == KEY_R: get_tree().reload_current_scene()
 	elif event.physical_keycode == KEY_TAB: get_tree().change_scene_to_file("res://menus/start_menu.tscn")
 

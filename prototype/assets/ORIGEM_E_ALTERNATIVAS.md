@@ -53,3 +53,8 @@ O atlas antigo `player/player.png` e seu arquivo de importacao foram excluidos n
 `corridor-backgrounds.png`: atlas original de três fundos distintos (laboratório, fábrica de turbinas e reator), gerado com a ferramenta integrada image_gen da OpenAI. `factory-props.png`: atlas transparente original de barril, latão, caixa e ferramentas. Os recortes são feitos pelo Godot, sem alterar os PNGs. Prompts completos e arquivos em `GERACAO_V7.md`. A iluminação dos fundos é pintada; as vigas em primeiro plano e os objetos são camadas 2D.
 
 `video/introduction.ogv`: conversão para Theora/Vorbis do vídeo `WhatsApp Video 2026-10-23 at 22.04.54.mp4`, fornecido pelo usuário e incluído a seu pedido. O arquivo original no Desktop foi preservado. A conversão mantém o áudio, sem recortar o conteúdo. O vídeo está apenas na cópia e no ZIP locais; sua publicação no repositório público aguarda autorização explícita. Autoria e licença não foram informadas; não se atribui uma nova licença ao vídeo.
+
+
+## Revisão v8
+
+Nova arte de corrida armada, rifle e escudo, criada com image_gen a partir da personagem original, e efeitos/voz sintética locais. Arquivos, método e prompt em `GERACAO_V8.md`. Nenhuma arte ou gravação de outra franquia foi incorporada.

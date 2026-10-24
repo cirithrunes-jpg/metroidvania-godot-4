@@ -33,7 +33,7 @@ func _ready():
 	shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas.add_child(shadow)
 	canvas.move_child(shadow,canvas.get_child_count()-2)
-	hint.text = "A/D mover · Espaço / W salto duplo · Z tiro · J soco · K chute · L defesa\nE botão · Esc pausa · Tab menu · R reiniciar"
+	hint.text = "A/D mover · Espaço / W salto duplo · Z tiro · J soco · K chute · L defesa\nE botão · Esc/Menu/Options: pausa e controles · Controle Xbox/PlayStation compatível"
 	curtain = ColorRect.new()
 	curtain.size = Vector2(1280,720)
 	curtain.color = Color(0,0,0,0)

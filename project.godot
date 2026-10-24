@@ -26,6 +26,8 @@ WorldStash="*res://WorldStash.gd"
 Sound="*res://music_and_sounds/sound.tscn"
 Music="*res://music_and_sounds/music.tscn"
 SaveManager="*res://SaveManager.gd"
+CombatInput="*res://prototype/combat_input.gd"
+CampaignSave="*res://prototype/campaign_save.gd"
 
 [display]
 

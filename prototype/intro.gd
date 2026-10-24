@@ -20,9 +20,9 @@ func _ready():
 	label.scale = Vector2.ONE/4
 	label.add_theme_font_size_override("font_size",20)
 	add_child(label)
-func _unhandled_key_input(event):
-	if event.pressed and event.physical_keycode in [KEY_SPACE,KEY_ENTER,KEY_ESCAPE]: start_level()
+func _unhandled_input(event):
+	if event.is_action_pressed("ui_accept") or event.is_action_pressed("jump") or event.is_action_pressed("pause"): start_level()
 func start_level():
 	if leaving: return
 	leaving = true
-	get_tree().change_scene_to_file("res://prototype/laboratory.tscn")
+	get_tree().change_scene_to_file("res://prototype/mission.tscn")

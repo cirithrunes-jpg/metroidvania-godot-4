@@ -11,6 +11,7 @@ const COOLDOWN := [2.6,3.1,3.4,2.8,3.8]
 const SHOT_SPEED := [65.0,85.0,60.0,55.0,48.0]
 const ROUND = preload("res://prototype/enemies/security_round.gd")
 const DEATH = preload("res://prototype/combat/ballistic_fx.gd")
+var spawn_id := -1
 var health := 2
 var origin := Vector2.ZERO
 var facing := -1.0
@@ -138,6 +139,7 @@ func floor_ahead() -> bool:
 	return not get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
 func fire_round():
+	Sound.play(preload("res://prototype/assets/audio/rifle-shot.wav"),0.82,-14)
 	var bullet := Area2D.new()
 	bullet.set_script(ROUND)
 	bullet.velocity = aim*SHOT_SPEED[kind]
@@ -152,6 +154,7 @@ func fire_round():
 
 func take_damage(_hitbox, damage):
 	if dying: return
+	Sound.play(preload("res://prototype/assets/audio/enemy-impact.wav"),randf_range(0.9,1.1),-6)
 	health -= damage
 	flash = 0.12
 	if health <= 0:

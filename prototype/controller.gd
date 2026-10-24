@@ -13,6 +13,9 @@ var stagger := 0.0
 var melee_kind := ""
 var melee_time := 0.0
 var melee_hit := false
+var armed_time := 0.0
+var guard_impact := 0.0
+const VOICES = [preload("res://prototype/assets/audio/hurt-voice-1.wav"),preload("res://prototype/assets/audio/hurt-voice-2.wav")]
 
 func bind_key(action: String, key: int):
 	if not InputMap.has_action(action): InputMap.add_action(action)
@@ -35,20 +38,12 @@ func melee_strike():
 		if target is Hurtbox and get_world_2d().direct_space_state.intersect_ray(ray).is_empty():
 			target.take_hit(self,2 if melee_kind == "kick" else 1)
 
-func _draw():
-	if guarding:
-		var shade := Color("38cfff") if shield_hits < 2 else Color("ff9e53")
-		draw_arc(Vector2(facing*7,-16),19,-1.3 if facing>0 else 1.84,1.3 if facing>0 else 4.44,20,shade,1.5)
-
-
 func _ready():
-	InputMap.action_erase_events("fire")
 	bind_key("fire",KEY_Z)
 	bind_key("attack_punch",KEY_J)
 	bind_key("attack_kick",KEY_K)
 	bind_key("guard",KEY_L)
 	bind_key("interact",KEY_E)
-	InputMap.action_erase_events("pause")
 	bind_key("pause",KEY_ESCAPE)
 	var space := InputEventKey.new()
 	space.physical_keycode = KEY_SPACE
@@ -70,6 +65,8 @@ func _ready():
 	add_child(art)
 
 func _physics_process(delta):
+	armed_time = maxf(0,armed_time-delta)
+	guard_impact = maxf(0,guard_impact-delta)
 	var axis := Input.get_axis("move_left","move_right")
 	var grounded := is_on_floor()
 	stagger = maxf(0,stagger-delta)
@@ -123,8 +120,9 @@ func _physics_process(delta):
 	sprite_2d.scale.x = facing
 	sprite_2d.modulate = Color(1,0.65,0.6,0.55 if sin(invulnerability*35)>0 else 1.0) if invulnerability>0 else Color.WHITE
 	player_blaster.position = Vector2(facing*2,-17)
-	player_blaster.visible = not guarding and melee_time <= 0
+	player_blaster.visible = false
 	if Input.is_action_pressed("fire") and shot_delay <= 0 and not guarding and melee_time <= 0 and stagger <= 0:
+		armed_time = 0.28
 		player_blaster.fire_bullet()
 		shot_delay = 0.17
 
@@ -132,6 +130,8 @@ func _on_hurtbox_hurt(_hitbox,damage):
 	if invulnerability > 0: return
 	if guarding and is_instance_valid(_hitbox) and _hitbox.is_in_group("enemy_projectiles"):
 		shield_hits += 1
+		guard_impact = 0.16
+		Sound.play(preload("res://prototype/assets/audio/shield-impact.wav"),1,-8)
 		if shield_hits <= 2:
 			queue_redraw()
 			return
@@ -142,5 +142,5 @@ func _on_hurtbox_hurt(_hitbox,damage):
 	invulnerability = 0.9
 	hurtbox.is_invincible = true
 	PlayerStats.health -= damage
-	Sound.play(Sound.hurt,1,-7)
+	Sound.play(VOICES[randi()%VOICES.size()],randf_range(0.96,1.04),-2)
 	Events.add_screenshake.emit(0.6,0.12)

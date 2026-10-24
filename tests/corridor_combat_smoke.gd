@@ -142,10 +142,11 @@ func run():
 	if FileAccess.file_exists("res://prototype/assets/video/introduction.ogv"):
 		check(current_scene.video.stream is VideoStreamTheora and current_scene.video.is_playing(),"supplied video starts in introduction")
 		await capture("res://artifacts/intro-v7-preview.png")
-		await create_timer(10.5).timeout
+		await create_timer(14.0).timeout
 		await ticks(8)
 	else:
-		check(current_scene.scene_file_path=="res://prototype/laboratory.tscn","missing local video safely skipped")
+		await create_timer(3.5).timeout
+		check(current_scene.scene_file_path=="res://prototype/laboratory.tscn","missing local video safely skipped after mission")
 	check(current_scene.scene_file_path=="res://prototype/laboratory.tscn","video completion opens first corridor")
 	root.get_node("Music").audio_stream_player.stop()
 	for sound in root.get_node("Sound").sound_players: sound.stop()

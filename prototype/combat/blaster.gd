@@ -18,15 +18,16 @@ func fire_bullet():
 	bullet.set_script(ROUND)
 	bullet.velocity = direction*520
 	MainInstances.level.add_child(bullet)
-	bullet.global_position = muzzle.global_position
+	bullet.global_position = get_parent().global_position+Vector2(get_parent().facing*23,-20)
 	var flash := Node2D.new()
 	flash.set_script(FX)
 	flash.mode = "muzzle"
 	flash.direction = direction
 	MainInstances.level.add_child(flash)
-	flash.global_position = muzzle.global_position
+	flash.global_position = get_parent().global_position+Vector2(get_parent().facing*23,-20)
+	get_parent().armed_time = 0.28
 	recoil = 1.3
-	Sound.play(Sound.bullet,randf_range(0.8,0.93),-13)
+	Sound.play(preload("res://prototype/assets/audio/rifle-shot.wav"),randf_range(0.96,1.04),-7)
 
 func fire_missile():
 	fire_bullet()
