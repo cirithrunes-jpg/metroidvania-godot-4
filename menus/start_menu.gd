@@ -34,7 +34,7 @@ func _ready():
 	ui.add_child(quit)
 	start.grab_focus()
 	var controls := Label.new()
-	controls.text = "A/D: mover   ·   W / espaço: pular   ·   Mouse: mirar e atirar\nEsc: pausa   ·   Tab: menu   ·   R: reiniciar o setor"
+	controls.text = "A/D mover · Espaço / W pular · Z atirar\nJ soco · K chute · L defesa · E botão\nEsc pausa · Tab menu · R reiniciar"
 	controls.position = Vector2(390,510)
 	controls.add_theme_font_size_override("font_size",21)
 	ui.add_child(controls)
@@ -42,4 +42,4 @@ func _ready():
 func _on_start_button_pressed():
 	PlayerStats.reset()
 	WorldStash.data = {}
-	get_tree().change_scene_to_file("res://prototype/laboratory.tscn")
+	get_tree().change_scene_to_file("res://prototype/intro.tscn")

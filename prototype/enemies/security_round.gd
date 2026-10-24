@@ -6,6 +6,7 @@ var spent := false
 const FX = preload("res://prototype/combat/ballistic_fx.gd")
 
 func _ready():
+	add_to_group("enemy_projectiles")
 	collision_layer = 0
 	collision_mask = 17
 	var collider := CollisionShape2D.new()

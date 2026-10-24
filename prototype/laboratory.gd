@@ -8,6 +8,8 @@ const LAB_SOUNDTRACK = preload("res://prototype/assets/steel-dungeon-soundtrack.
 const FLOORS := [Rect2(0,152,260,28),Rect2(300,152,310,28),Rect2(660,152,300,28),Rect2(184,120,60,8),Rect2(342,116,70,8),Rect2(446,80,74,8),Rect2(560,112,60,8),Rect2(704,114,70,8)]
 @export_range(1,3) var sector := 1
 var floors: Array = FLOORS
+var corridor_width := 1920
+var door_point := Vector2(1860,300)
 var player: CharacterBody2D
 var checkpoint := Vector2(36,148)
 var relay_point := Vector2(484,80)
@@ -25,16 +27,20 @@ func _enter_tree():
 	MainInstances.world = self
 
 func configure_sector():
+	floors = [Rect2(0,300,440,60),Rect2(480,300,560,60),Rect2(1080,300,380,60),Rect2(1500,300,420,60)]
+	var shift := float((sector-1)*90)
+	for step in 4: floors.append(Rect2(540+shift+step*90,264-step*36,112,9))
+	relay_point = Vector2(860+shift,156)
+	relay_checkpoint = Vector2(842+shift,152)
+	for x in [180,350,1100,1280,1450]: floors.append(Rect2(x,250,110,9))
+	floors.append(Rect2(1190,212,120,9))
+	floors.append(Rect2(1370,210,110,9))
 	if sector == 2:
-		floors = [Rect2(0,152,240,28),Rect2(282,152,330,28),Rect2(656,152,304,28),Rect2(166,120,66,8),Rect2(348,114,72,8),Rect2(480,80,76,8),Rect2(584,112,66,8),Rect2(730,116,70,8)]
-		relay_point = Vector2(514,80)
-		relay_checkpoint = Vector2(598,108)
-		deployment = [Vector2(155,152),Vector2(385,114),Vector2(555,152),Vector2(696,76),Vector2(850,152)]
-	elif sector == 3:
-		floors = [Rect2(0,152,268,28),Rect2(308,152,290,28),Rect2(648,152,312,28),Rect2(182,120,62,8),Rect2(326,116,74,8),Rect2(424,80,76,8),Rect2(542,112,72,8),Rect2(716,114,72,8)]
-		relay_point = Vector2(458,80)
-		relay_checkpoint = Vector2(560,108)
-		deployment = [Vector2(160,152),Vector2(364,116),Vector2(546,152),Vector2(680,77),Vector2(840,152)]
+		for step in 4: floors.append(Rect2(1530+step*90,264-step*36,120,9))
+		door_point = Vector2(1860,156)
+	else: door_point = Vector2(1860,300)
+	checkpoint = Vector2(36,296)
+	deployment = [Vector2(190,300),Vector2(385,300),Vector2(600,300),Vector2(910,300),Vector2(1160,300),Vector2(1350,300),Vector2(1560,300),Vector2(1740,300),Vector2(650+shift,228),Vector2(1200,170),Vector2(1430,210)]
 
 func _ready():
 	configure_sector()
@@ -42,28 +48,27 @@ func _ready():
 	WorldStash.data = {}
 	RenderingServer.set_default_clear_color(Color("090e17"))
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	var backdrop := Sprite2D.new()
-	backdrop.texture = BACKDROP
-	backdrop.centered = false
-	backdrop.scale = Vector2.ONE*(960.0/BACKDROP.get_width())
-	backdrop.position = Vector2(0,-36)
-	backdrop.modulate = [Color(0.72,0.77,0.84),Color(0.64,0.77,0.81),Color(0.8,0.67,0.72)][sector-1]
-	backdrop.z_index = -5
-	add_child(backdrop)
+	for front in [false,true]:
+		var scenery := Node2D.new()
+		scenery.set_script(preload("res://prototype/factory_scenery.gd"))
+		scenery.sector = sector
+		scenery.foreground = front
+		add_child(scenery)
 	for rect in floors:
 		var body := StaticBody2D.new()
 		var shape := CollisionShape2D.new()
 		var box := RectangleShape2D.new()
 		box.size = rect.size
 		shape.shape = box
+		shape.one_way_collision = rect.size.y < 10
 		body.position = rect.get_center()
 		body.add_child(shape)
 		add_child(body)
-	for x in [-8,960]:
+	for x in [-8,corridor_width+8]:
 		var wall := StaticBody2D.new()
 		var collision := CollisionShape2D.new()
 		var box := RectangleShape2D.new()
-		box.size = Vector2(16,400)
+		box.size = Vector2(16,800)
 		collision.shape = box
 		wall.position = Vector2(x,0)
 		wall.add_child(collision)
@@ -71,7 +76,7 @@ func _ready():
 	spawn_player()
 	for index in deployment.size():
 		var enemy = preload("res://prototype/enemies/security_unit.tscn").instantiate()
-		enemy.kind = index
+		enemy.kind = [0,0,2,1,0,2,0,4,1,3,2][index]
 		enemy.position = deployment[index]
 		enemy.patrol_radius = 16.0 if index == 1 else 20.0
 		add_child(enemy)
@@ -80,11 +85,11 @@ func _ready():
 	add_child(hud)
 	exit_door = Node2D.new()
 	exit_door.set_script(preload("res://prototype/pressure_door.gd"))
-	exit_door.position = Vector2(923,152)
+	exit_door.position = door_point
 	add_child(exit_door)
 	exit_door.entered.connect(begin_transition)
-	world_label("RELÉ / CHECKPOINT",relay_point+Vector2(-24,-34))
-	world_label("PRÓXIMO SETOR" if sector<3 else "SAÍDA",Vector2(899,73))
+	world_label("E: ACIONAR BOTÃO",relay_point+Vector2(-24,-34))
+	world_label("PRÓXIMO SETOR" if sector<3 else "SAÍDA",door_point+Vector2(-24,-82))
 	Events.player_died.connect(respawn)
 	if Music.audio_stream_player.stream != LAB_SOUNDTRACK or not Music.audio_stream_player.playing:
 		Music.play(LAB_SOUNDTRACK)
@@ -104,7 +109,7 @@ func spawn_player():
 	add_child(player)
 	var blaster = player.get_node("PlayerBlaster/BlasterSprite")
 	var weapon := Polygon2D.new()
-	weapon.polygon = PackedVector2Array([Vector2(-3,-2),Vector2(8,-2),Vector2(10,0),Vector2(8,2),Vector2(-3,2)])
+	weapon.polygon = PackedVector2Array([Vector2(-3,-2),Vector2(7,-2),Vector2(7,-1),Vector2(10,-1),Vector2(10,1),Vector2(6,1),Vector2(5,3),Vector2(2,3),Vector2(2,1),Vector2(-3,1)])
 	weapon.color = Color("435663")
 	blaster.add_child(weapon)
 	var seam := Line2D.new()
@@ -114,9 +119,9 @@ func spawn_player():
 	blaster.add_child(seam)
 	var camera: Camera2D = player.get_node("Camera2D")
 	camera.limit_left = 0
-	camera.limit_right = 960
+	camera.limit_right = corridor_width
 	camera.limit_top = 0
-	camera.limit_bottom = 180
+	camera.limit_bottom = 360
 	player.reset_physics_interpolation()
 	camera.reset_smoothing()
 
@@ -131,18 +136,19 @@ func respawn():
 func _process(delta):
 	if not paused: elapsed += delta
 	if is_instance_valid(player) and not paused and not finished:
-		if player.position.y > 195:
+		if player.position.y > 390:
 			player.position = checkpoint
 			player.velocity = Vector2.ZERO
 			player.reset_physics_interpolation()
 			player.get_node("Camera2D").reset_smoothing()
 			PlayerStats.health = maxi(1,PlayerStats.health-1)
-		if player.position.distance_to(relay_point)<24:
+		if player.position.distance_to(relay_point)<24 and Input.is_action_just_pressed("interact"):
 			relay = true
 			checkpoint = relay_checkpoint
 	exit_door.unlocked = relay
 	exit_door.paused = paused
 	hud.update_readout(sector,PlayerStats.health,PlayerStats.max_health,relay,paused)
+	if is_instance_valid(player): hud.update_shield(player.shield_hits,player.shield_recovery,player.guarding)
 	queue_redraw()
 
 func begin_transition():
@@ -183,10 +189,9 @@ func _draw():
 		if rect.size.y < 10:
 			draw_line(rect.position+Vector2(4,8),rect.position+Vector2(12,13),Color("263a44"),1.2)
 			draw_line(rect.position+Vector2(rect.size.x-4,8),rect.position+Vector2(rect.size.x-12,13),Color("263a44"),1.2)
-	var pits := [260,610] if sector==1 else ([240,612] if sector==2 else [268,598])
-	for x in pits:
-		draw_rect(Rect2(x,176,42,4),Color("712433"))
-		draw_line(Vector2(x,174),Vector2(x+40,174),RED,0.7)
+	for x in [440,1040,1460]:
+		draw_rect(Rect2(x,354,40,6),Color("712433"))
+		draw_line(Vector2(x,352),Vector2(x+40,352),RED,0.7)
 	var panel := Rect2(relay_point+Vector2(-9,-22),Vector2(18,22))
 	draw_style_box(relay_style(),panel)
 	draw_rect(Rect2(relay_point+Vector2(-6,-18),Vector2(12,6)),CYAN if not relay else Color("a0ffda"))

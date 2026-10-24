@@ -21,19 +21,19 @@ func run():
 	current_scene = scene
 	await ticks(4)
 	var units = get_nodes_in_group("lab_enemies")
-	check(units.size() == 5,"squad contains exactly five units")
+	check(units.size() == 11,"expanded squad contains eleven units")
 	var kinds := []
 	for unit in units:
 		kinds.append(unit.kind)
 		unit.set_physics_process(false)
 		check(unit.visual.sprite_frames.get_frame_count("default") == 6,"six animation frames for variant %d" % unit.kind)
-	check(kinds == [0,1,2,3,4],"all five roles deployed once")
-	check(units[2].health > units[0].health and units[4].health > units[2].health,"armor and robot have distinct resistance")
+	check(kinds.has(0) and kinds.has(1) and kinds.has(2) and kinds.has(3) and kinds.has(4),"all five roles deployed")
+	check(units[2].health > units[0].health and units[7].health > units[2].health,"armor and robot have distinct resistance")
 	scene.player.set_physics_process(false)
 	var patrol = units[0]
-	patrol.position = Vector2(90,152)
+	patrol.position = Vector2(90,300)
 	patrol.origin = patrol.position
-	scene.player.position = Vector2(145,152)
+	scene.player.position = Vector2(145,300)
 	patrol.cooldown = 0
 	patrol.set_physics_process(true)
 	await ticks(2)
@@ -49,7 +49,7 @@ func run():
 	var box := RectangleShape2D.new()
 	box.size = Vector2(8,70)
 	collider.shape = box
-	wall.position = Vector2(120,120)
+	wall.position = Vector2(120,270)
 	wall.add_child(collider)
 	scene.add_child(wall)
 	await ticks(2)
@@ -61,21 +61,21 @@ func run():
 	check(scene.level.get_child_count() == 0,"solid wall stops security projectile and impact expires")
 	wall.queue_free()
 	await ticks(2)
-	var drone = units[3]
+	var drone = units[9]
 	var start_y: float = drone.position.y
 	drone.set_physics_process(true)
 	await ticks(35)
 	drone.set_physics_process(false)
 	check(absf(drone.position.y-start_y) < 8,"drone hovers without falling")
-	patrol.position = Vector2(250,152)
-	patrol.origin = Vector2(240,152)
+	patrol.position = Vector2(430,300)
+	patrol.origin = Vector2(420,300)
 	patrol.facing = 1
 	patrol.cooldown = 100
-	scene.player.position = Vector2(36,152)
+	scene.player.position = Vector2(36,300)
 	patrol.set_physics_process(true)
 	await ticks(60)
 	patrol.set_physics_process(false)
-	check(patrol.position.x < 256 and patrol.position.y < 155,"patrol turns before a pit")
+	check(patrol.position.x < 436 and patrol.position.y < 303,"patrol turns before a pit")
 	var armor = units[2]
 	armor.take_damage(null,1)
 	check(armor.health == 3,"player damage reduces armored health")

@@ -21,13 +21,20 @@ func _ready():
 	offset = Vector2(-128,-256)
 	sprite_frames = SpriteFrames.new()
 	sprite_frames.remove_animation("default")
-	add_sequence("idle",0,[0,1,2,3,4,5],7.0,true)
+	add_sequence("idle",0,[0],1.0,true)
 	add_sequence("run",1,[0,1,2,3,4,5],16.0,true)
 	add_sequence("rise",2,[1,2],10.0,false)
 	add_sequence("apex",2,[3],1.0,false)
 	add_sequence("fall",2,[4],1.0,false)
 	add_sequence("wall",2,[5],1.0,false)
 	add_sequence("land",3,[0,1,2,3,4,5],24.0,false)
+	var actions = preload("res://prototype/animations/actions.tres")
+	for action in ["punch","kick","guard"]:
+		sprite_frames.add_animation(action)
+		sprite_frames.set_animation_speed(action,14)
+		sprite_frames.set_animation_loop(action,false)
+		for i in actions.get_frame_count(action):
+			sprite_frames.add_frame(action,actions.get_frame_texture(action,i))
 	play("idle")
 	previous = Sprite2D.new()
 	previous.centered = false
@@ -74,11 +81,18 @@ func _process(delta):
 		target = "run"
 	elif landing_time > 0:
 		target = "land"
+	if actor.guarding: target = "guard"
+	elif actor.melee_time > 0: target = actor.melee_kind
+	var action_pose: bool = target in ["guard","punch","kick"]
+	offset = Vector2(-256,-352) if action_pose else Vector2(-128,-256)
+	previous.position = offset
 	if animation != target: play(target)
+	if target == "guard" and frame >= 3: pause()
 	speed_scale = lerpf(0.6,1.1,motion_blend) if target == "run" else 1.0
 	if target == "run" and actor.velocity.x*facing < 0: speed_scale *= -1.0
 	var breathe := sin(clock*2.6)*0.004 if target == "idle" else 0.0
-	scale = Vector2(facing*DRAW_SCALE*(1.0+squash*0.5),DRAW_SCALE*(1.0-squash+breathe))
+	var size := 0.12 if action_pose else DRAW_SCALE
+	scale = Vector2(facing*size*(1.0+squash*0.5),size*(1.0-squash+breathe))
 	rotation = lerpf(rotation,clampf(actor.velocity.x/64.0,-1,1)*0.025,blend)
 	modulate = actor.get_node("Sprite2D").modulate
 	was_grounded = grounded
@@ -87,4 +101,4 @@ func blend_frame():
 	if not is_instance_valid(previous): return
 	previous.texture = last_texture
 	last_texture = sprite_frames.get_frame_texture(animation,frame)
-	dissolve = 0.0
+	dissolve = 1.0 # Registered idle and crisp action frames avoid double-image ghosting.

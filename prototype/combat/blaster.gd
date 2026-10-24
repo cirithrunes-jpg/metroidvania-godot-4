@@ -8,11 +8,12 @@ var recoil := 0.0
 
 func _process(delta):
 	recoil = move_toward(recoil,0,24*delta)
-	blaster_sprite.rotation = (get_global_mouse_position()-global_position).angle()
-	blaster_sprite.position.x = -recoil
+	blaster_sprite.rotation = 0 if get_parent().facing > 0 else PI
+	blaster_sprite.position.x = -get_parent().facing*recoil
 
 func fire_bullet():
-	var direction := Vector2.RIGHT.rotated(blaster_sprite.global_rotation)
+	blaster_sprite.rotation = 0 if get_parent().facing > 0 else PI
+	var direction := Vector2(get_parent().facing,0)
 	var bullet := Node2D.new()
 	bullet.set_script(ROUND)
 	bullet.velocity = direction*520

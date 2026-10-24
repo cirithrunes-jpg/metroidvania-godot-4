@@ -1,5 +1,6 @@
 extends CanvasLayer
 
+var shield: Label
 var health: Label
 var objective: Label
 var hint: Label
@@ -21,17 +22,18 @@ func _ready():
 	bar.size = Vector2(1280,88)
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas.add_child(bar)
+	shield = make_label(Vector2(850,14),21)
 	health = make_label(Vector2(28,14),24)
 	objective = make_label(Vector2(28,49),21)
-	hint = make_label(Vector2(28,674),20)
+	hint = make_label(Vector2(28,656),19)
 	var shadow := ColorRect.new()
 	shadow.color = Color(0.015,0.025,0.04,0.9)
-	shadow.position = Vector2(12,666)
-	shadow.size = Vector2(1256,40)
+	shadow.position = Vector2(12,648)
+	shadow.size = Vector2(1256,64)
 	shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas.add_child(shadow)
 	canvas.move_child(shadow,canvas.get_child_count()-2)
-	hint.text = "A/D mover   ·   W / espaço: salto duplo   ·   Mouse: mirar e atirar   ·   Esc: pausa   ·   Tab: menu"
+	hint.text = "A/D mover · Espaço / W salto duplo · Z tiro · J soco · K chute · L defesa\nE botão · Esc pausa · Tab menu · R reiniciar"
 	curtain = ColorRect.new()
 	curtain.size = Vector2(1280,720)
 	curtain.color = Color(0,0,0,0)
@@ -48,7 +50,7 @@ func make_label(point: Vector2, size: int) -> Label:
 
 func update_readout(sector: int, hp: int, maximum: int, relay: bool, paused: bool):
 	health.text = "SETOR %02d   /   INTEGRIDADE  %d / %d" % [sector,hp,maximum]
-	objective.text = "Porta liberada — siga até a saída à direita." if relay else "Ative o relé luminoso na plataforma alta para liberar a porta."
+	objective.text = "Porta liberada — siga até a saída à direita." if relay else "Suba até o botão e pressione E para liberar a porta."
 	objective.modulate = Color("8ee3ef")
 	if paused:
 		objective.text = "PAUSADO — Esc para continuar. Tab para voltar ao menu."
@@ -57,3 +59,7 @@ func fade_out() -> Tween:
 	var tween := create_tween()
 	tween.tween_property(curtain,"color",Color.BLACK,0.35)
 	return tween
+
+func update_shield(hits: int, recovery: float, defending: bool):
+	shield.text = "ESCUDO: RECARGA %.1fs" % recovery if recovery > 0 else "ESCUDO: %d/2%s" % [maxi(0,2-hits)," DEFENDENDO" if defending else ""]
+	shield.modulate = Color("ff9a79") if hits>=2 else Color("8ee3ef")

@@ -46,3 +46,10 @@ O atlas antigo `player/player.png` e seu arquivo de importacao foram excluidos n
 ## Biblioteca de poses
 
 `poses/combat.png`, `poses/mobility.png`, `poses/extras.png` e `poses/weapons.png`: novas artes originais geradas com a ferramenta de imagens da OpenAI em 23/10/2026 a partir do atlas existente da nossa personagem. Quatro conjuntos de acoes, incluindo movimentos, vista traseira, armas e poder de energia de linguagem anime. A folha com armas foi refeita com figuras menores para manter espadas e efeitos dentro do espaco de cada quadro. Nenhuma imagem de outra franquia foi usada como referencia. Os recortes e margens do Godot estao em `animations/actions.tres`, sem editar os pixels dos PNGs.
+
+
+## Revisão v7: corredores, objetos e introdução
+
+`corridor-backgrounds.png`: atlas original de três fundos distintos (laboratório, fábrica de turbinas e reator), gerado com a ferramenta integrada image_gen da OpenAI. `factory-props.png`: atlas transparente original de barril, latão, caixa e ferramentas. Os recortes são feitos pelo Godot, sem alterar os PNGs. Prompts completos e arquivos em `GERACAO_V7.md`. A iluminação dos fundos é pintada; as vigas em primeiro plano e os objetos são camadas 2D.
+
+`video/introduction.ogv`: conversão para Theora/Vorbis do vídeo `WhatsApp Video 2026-10-23 at 22.04.54.mp4`, fornecido pelo usuário e incluído a seu pedido. O arquivo original no Desktop foi preservado. A conversão mantém o áudio, sem recortar o conteúdo. O vídeo está apenas na cópia e no ZIP locais; sua publicação no repositório público aguarda autorização explícita. Autoria e licença não foram informadas; não se atribui uma nova licença ao vídeo.

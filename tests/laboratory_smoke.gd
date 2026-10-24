@@ -55,7 +55,7 @@ func run():
 	Input.action_press("jump")
 	await ticks(6)
 	Input.action_release("jump")
-	check(scene.player.position.y<140,"jump takes player off floor")
+	check(scene.player.position.y<290,"jump takes player off floor")
 	await ticks(2)
 	Input.action_press("jump")
 	await ticks(2)
@@ -65,16 +65,18 @@ func run():
 	await ticks(1)
 	check(get_nodes_in_group("player_rounds").size()>0,"new ballistic projectile spawns")
 	check(scene.level.get_child_count()>=2,"muzzle flash accompanies projectile")
-	scene.player.position = Vector2(110,148)
+	scene.player.position = Vector2(110,296)
 	scene.player.velocity = Vector2.ZERO
 	scene.player.reset_physics_interpolation()
 	scene.player.get_node("Camera2D").reset_smoothing()
 	await ticks(24)
 	await capture("res://artifacts/laboratorio-v6-preview.png")
 	scene.player.position = scene.relay_point+Vector2(0,-4)
+	Input.action_press("interact")
 	await ticks(3)
+	Input.action_release("interact")
 	check(scene.relay,"relay unlocks door")
-	scene.player.position = Vector2(620,210)
+	scene.player.position = Vector2(1050,410)
 	await ticks(3)
 	check(scene.player.position.distance_to(scene.checkpoint)<10,"fall returns to checkpoint")
 	var old_player = scene.player
@@ -91,7 +93,7 @@ func run():
 		scene = current_scene
 		freeze_units()
 		check(scene.sector == sector,"sector %d loads" % sector)
-		scene.player.position = Vector2(923,152)
+		scene.player.position = scene.door_point
 		scene.player.velocity = Vector2.ZERO
 		scene.player.set_physics_process(false)
 		scene.relay = false
@@ -111,7 +113,13 @@ func run():
 	await capture("res://artifacts/menu-v6-preview.png")
 	current_scene._on_start_button_pressed()
 	await ticks(8)
-	check(current_scene.sector==1,"replay begins current campaign")
+	if FileAccess.file_exists("res://prototype/assets/video/introduction.ogv"):
+		check(current_scene.scene_file_path == "res://prototype/intro.tscn","replay begins video introduction")
+		current_scene.start_level()
+		await ticks(8)
+	else:
+		check(current_scene.scene_file_path == "res://prototype/laboratory.tscn","missing local video safely skips introduction")
+	check(current_scene.sector==1,"intro skip begins first corridor")
 	root.get_node("Music").audio_stream_player.stop()
 	for sound in root.get_node("Sound").sound_players: sound.stop()
 	await settle(0.1)

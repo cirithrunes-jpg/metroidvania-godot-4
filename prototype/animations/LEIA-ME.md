@@ -37,7 +37,7 @@ Nomes: `punch`, `kick`, `guard`, `hit`, `crouch`, `all_fours`, `prone_crawl`, `f
 
 Cada quadro tem canvas virtual de 512 x 384; ancora dos pes em (256,352). A escala extra das poses com armas esta nos metadados `pose_scales`. Os recortes mantem os PNGs originais intactos. Os ciclos de rolamento e escalada reutilizam um quadro de recuperacao para evitar vazamento da linha vizinha. As animacoes sao uma primeira passagem artistica e podem precisar de refinamento de timing e transicoes ao entrar no controlador final.
 
-Este pacote entrega **arte e biblioteca de animacao**. Ataques corpo a corpo, dano da espada, arremesso/fusivel da granada, colisores ao rastejar e custo/dano do poder ainda sao mecanicas a conectar. A campanha e seus controles continuam funcionando como na versao revisada anterior.
+Soco, chute e defesa agora estao ligados ao controlador da campanha (J, K e L). Espada, granada, rastejar e poder continuam como biblioteca de arte, sem mecanicas de combate associadas.
 
 ## Validacao
 
