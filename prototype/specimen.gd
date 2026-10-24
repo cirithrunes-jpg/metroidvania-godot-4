@@ -7,6 +7,7 @@ var was_grounded := true
 var landing_time := 0.0
 var squash := 0.0
 var guard_started := false
+var was_posture := "standing"
 const CUTS := [0,235,465,695,925,1150,1370,1590,1774]
 const ROWS := [0,231,455,675,887]
 const REGIONS := [[[38, 8, 175, 218], [286, 9, 162, 217], [552, 8, 98, 219], [721, 8, 170, 208], [931, 10, 177, 216], [1177, 8, 155, 218], [1440, 8, 96, 219]], [[26, 235, 205, 214], [279, 235, 184, 214], [539, 235, 146, 215], [712, 235, 190, 205], [930, 235, 204, 214], [1186, 235, 182, 214], [1438, 235, 142, 214]], [[55, 456, 149, 212], [271, 456, 150, 212], [485, 455, 152, 213], [704, 456, 150, 212], [934, 455, 157, 213], [1150, 456, 157, 212], [1370, 456, 155, 212]], [[47, 675, 137, 206], [274, 676, 134, 205], [494, 675, 135, 206], [710, 675, 134, 206], [929, 683, 155, 196], [1150, 683, 156, 196], [1370, 695, 156, 185]]]
@@ -30,11 +31,22 @@ func _ready():
 	add_old("wall",2,[5],1,false)
 	add_old("land",3,[0,1,2,3,4,5],24,false)
 	var actions = preload("res://prototype/animations/actions.tres")
-	for action in ["punch","kick"]:
+	for action in ["punch","kick","sword","grenade","energy","crouch","prone_crawl","climb"]:
 		sprite_frames.add_animation(action)
 		sprite_frames.set_animation_speed(action,14)
 		sprite_frames.set_animation_loop(action,false)
 		for i in actions.get_frame_count(action): sprite_frames.add_frame(action,actions.get_frame_texture(action,i))
+	for definition in [["crouch_enter","crouch",[0,1,2,3,4,5],14,false],["crouch_hold","crouch",[5],1,true],["prone_idle","prone_crawl",[2],1,true],["energy_charge","energy",[0,1,2],5,true],["energy_release","energy",[3,4,5],10,false]]:
+		sprite_frames.add_animation(definition[0])
+		sprite_frames.set_animation_speed(definition[0],definition[3])
+		sprite_frames.set_animation_loop(definition[0],definition[4])
+		for i in definition[2]: sprite_frames.add_frame(definition[0],actions.get_frame_texture(definition[1],i))
+	sprite_frames.set_animation_loop("prone_crawl",true)
+	var aerial = preload("res://prototype/animations/air_kick.tres")
+	sprite_frames.add_animation("air_kick")
+	sprite_frames.set_animation_speed("air_kick",14)
+	sprite_frames.set_animation_loop("air_kick",false)
+	for i in aerial.get_frame_count("air_kick"): sprite_frames.add_frame("air_kick",aerial.get_frame_texture("air_kick",i))
 	play("idle")
 func add_combat(label: String,row: int,columns: Array,fps: float,looped: bool):
 	sprite_frames.add_animation(label)
@@ -75,23 +87,40 @@ func _process(delta):
 		else: target = "armed_fall"
 	elif absf(actor.velocity.x)>5: target = "armed_run"
 	elif actor.armed_time>0: target = "rifle"
+	if actor.posture=="crouch" and grounded:
+		if was_posture!="crouch": play("crouch_enter")
+		target = "crouch_enter" if animation=="crouch_enter" and is_playing() else "crouch_hold"
+	elif actor.posture=="prone" and grounded: target = "prone_crawl" if absf(actor.velocity.x)>1 else "prone_idle"
+	if actor.power_charge>0: target = "energy_charge"
+	elif actor.power_cast>0: target = "energy_release"
+	elif actor.grenade_time>0: target = "grenade"
 	if actor.guarding:
-		if not guard_started:
-			guard_started = true
-			play("guard_raise")
-		target = "guard_raise" if animation=="guard_raise" and is_playing() else "guard"
+		if actor.posture=="prone":
+			target = "prone_idle"
+			guard_started = false
+		else:
+			if not guard_started:
+				guard_started = true
+				play("guard_raise")
+			target = "guard_raise" if animation=="guard_raise" and is_playing() else "guard"
 	else: guard_started = false
 	if actor.melee_time>0: target = actor.melee_kind
 	if target!=animation:
 		stop()
 		play(target)
 	var old_pose: bool = target in ["rise","apex","fall","wall","land"]
-	var melee: bool = target in ["punch","kick"]
+	var melee: bool = target in ["punch","kick","sword","grenade","energy","energy_charge","energy_release","prone_crawl","prone_idle","crouch_enter","crouch_hold"]
 	offset = Vector2(-128,-256) if old_pose else Vector2(-256,-352)
 	var size := 0.132 if old_pose else (0.12 if melee else 0.145)
+	if target in ["sword","grenade","energy","energy_charge","energy_release"]: size *= 1.5
+	if target in ["crouch_enter","crouch_hold"] or (actor.guarding and actor.posture=="crouch"): size = 0.1
+	if target=="air_kick":
+		offset = Vector2(-300,-580)
+		size = 0.072
 	var breath := sin(clock*2.4)*0.004 if target=="idle" else 0.0
 	scale = Vector2(actor.facing*size*(1+squash*0.5),size*(1-squash+breath))
 	speed_scale = clampf(absf(actor.velocity.x)/72,0.35,1.15) if target=="armed_run" else 1.0
 	modulate = actor.get_node("Sprite2D").modulate
 	if actor.guard_impact>0: modulate = Color(1.3,1.7,2)
+	was_posture = actor.posture
 	was_grounded = grounded

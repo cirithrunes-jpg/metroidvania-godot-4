@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="SpriteFrames" path="res://prototype/animations/ladder_back.tres" id="1"]
+[node name="LadderBackPreview" type="Node2D"]
+[node name="Background" type="ColorRect" parent="."]
+offset_right = 320.0
+offset_bottom = 180.0
+color = Color(0.025,0.05,0.075,1)
+[node name="Title" type="Label" parent="."]
+offset_left = 18.0
+offset_top = 12.0
+scale = Vector2(0.25,0.25)
+theme_override_font_sizes/font_size = 32
+text = "ESCADA — VISTA DE COSTAS"
+[node name="Climbing" type="AnimatedSprite2D" parent="."]
+texture_filter = 2
+position = Vector2(160,150)
+scale = Vector2(0.132,0.132)
+sprite_frames = ExtResource("1")
+animation = &"ladder_back"
+autoplay = "ladder_back"
+centered = false
+offset = Vector2(-256,-352)

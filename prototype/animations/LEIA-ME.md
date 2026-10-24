@@ -44,3 +44,8 @@ Soco, chute e defesa agora estao ligados ao controlador da campanha (J, K e L). 
 25 verificacoes aprovadas no Godot: 16 sequencias, 96 quadros, recortes dentro das imagens, canvas normalizado, transparencia e selecao das 16 acoes na cena de previa. Previa e catalogo renderizados e inspecionados.
 
 No repositorio, `tests/build_pose_library.gd` reconstroi `actions.tres`; `tests/poses_smoke.gd` valida a biblioteca e `tests/poses_catalog.gd` gera o catalogo.
+
+
+## Integração v10
+
+Espada (L1), granada (L2), poder com carga (R2), agachar e rastejar agora estão ligados à campanha. O chute aéreo novo é `air_kick.tres`, com seis quadros originais. A escalada de costas foi salva separadamente em `ladder_back.tres`; use F6 em `ladder_back_preview.tscn` para conferir a sequência. O recurso está pronto para ser associado a escadas. Controles e regras atuais no README principal.

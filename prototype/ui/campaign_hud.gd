@@ -1,5 +1,6 @@
 extends CanvasLayer
 
+var ability: Label
 var shield: Label
 var health: Label
 var objective: Label
@@ -22,6 +23,7 @@ func _ready():
 	bar.size = Vector2(1280,88)
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	canvas.add_child(bar)
+	ability = make_label(Vector2(850,49),18)
 	shield = make_label(Vector2(850,14),21)
 	health = make_label(Vector2(28,14),24)
 	objective = make_label(Vector2(28,49),21)
@@ -67,6 +69,16 @@ func update_shield(hits: int, recovery: float, defending: bool):
 
 func refresh_bindings():
 	var names := []
-	for action in ["move_left","move_right","jump","fire","attack_punch","attack_kick","guard","interact","pause"]:
+	for action in ["move_left","move_right","jump","fire","attack_punch","attack_kick","guard","power","grenade","sword","posture_down"]:
 		names.append(CombatInput.describe(action,"key").split(", ")[0])
-	hint.text = "%s/%s mover · %s salto · %s tiro · %s soco · %s chute · %s defesa\n%s botão · %s pausa · Esc: acesso de emergência · Controles configuráveis na pausa" % names
+	hint.text = "%s/%s mover · %s salto · %s tiro · %s soco · %s chute · %s defesa\n%s poder (2s) · %s granada · %s espada · %s postura (3s/6s) · Esc: pausa/controles" % names
+
+func update_abilities(actor):
+	if actor.standing_blocked and actor.posture!="standing": ability.text = "SEM ESPAÇO PARA LEVANTAR"
+	elif actor.power_charge>0: ability.text = "PODER: %.1f / 2s" % actor.power_charge
+	elif actor.power_cast>0: ability.text = "PODER LIBERADO"
+	elif actor.down_hold>0 and actor.down_hold<3: ability.text = "AGACHAR: %.1f / 3s" % actor.down_hold
+	elif actor.down_hold>=3 and actor.down_hold<6: ability.text = "DEITAR: %.1f / 6s" % actor.down_hold
+	elif actor.posture!="standing": ability.text = "PULO PARA LEVANTAR"
+	elif actor.grenade_cooldown>0: ability.text = "GRANADA: %.1fs" % actor.grenade_cooldown
+	else: ability.text = "PODER: %s (2s)" % CombatInput.describe("power","pad")

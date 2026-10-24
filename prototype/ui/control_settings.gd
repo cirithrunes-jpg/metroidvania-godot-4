@@ -22,14 +22,33 @@ func _ready():
 	label(ui,"AÇÃO",Vector2(80,112),20)
 	label(ui,"TECLADO",Vector2(420,112),20)
 	label(ui,"XBOX / PLAYSTATION",Vector2(800,112),20)
+	var scroll := ScrollContainer.new()
+	scroll.position = Vector2(70,144)
+	scroll.size = Vector2(1140,426)
+	scroll.follow_focus = true
+	ui.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.custom_minimum_size.x = 1100
+	list.add_theme_constant_override("separation",5)
+	scroll.add_child(list)
 	for index in CombatInput.ACTIONS.size():
 		var action: String = CombatInput.ACTIONS[index]
-		var y := 146+index*39
-		label(ui,CombatInput.LABELS[index],Vector2(80,y+4),21)
+		var row := HBoxContainer.new()
+		row.custom_minimum_size.y = 36
+		row.add_theme_constant_override("separation",20)
+		list.add_child(row)
+		var title := Label.new()
+		title.text = CombatInput.LABELS[index]
+		title.custom_minimum_size = Vector2(320,36)
+		title.add_theme_font_size_override("font_size",20)
+		row.add_child(title)
 		rows[action] = {}
 		for kind in ["key","pad"]:
-			var item := button(ui,"",Vector2(410 if kind=="key" else 790,y),Vector2(350,34),func(): begin_capture(action,kind))
+			var item := Button.new()
+			item.custom_minimum_size = Vector2(350,36)
 			item.add_theme_font_size_override("font_size",18)
+			item.pressed.connect(func(): begin_capture(action,kind))
+			row.add_child(item)
 			rows[action][kind] = item
 			if index==0 and kind=="key": first = item
 	status = label(ui,"Conflitos trocam os comandos. Esc cancela a captura. Analógico e gatilhos são aceitos.",Vector2(80,588),20)

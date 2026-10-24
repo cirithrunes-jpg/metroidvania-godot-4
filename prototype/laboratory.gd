@@ -171,7 +171,9 @@ func _process(delta):
 	exit_door.unlocked = relay
 	exit_door.paused = paused
 	hud.update_readout(sector,PlayerStats.health,PlayerStats.max_health,relay,paused)
-	if is_instance_valid(player): hud.update_shield(player.shield_hits,player.shield_recovery,player.guarding)
+	if is_instance_valid(player):
+		hud.update_shield(player.shield_hits,player.shield_recovery,player.guarding)
+		hud.update_abilities(player)
 	queue_redraw()
 
 func begin_transition():

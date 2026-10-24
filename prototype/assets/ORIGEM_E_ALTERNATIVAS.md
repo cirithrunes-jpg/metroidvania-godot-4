@@ -63,3 +63,8 @@ Nova arte de corrida armada, rifle e escudo, criada com image_gen a partir da pe
 ## Revisão v9: pôster no menu
 
 `menu-poster.png` é uma cópia integral do pôster anime original já gerado para a personagem no projeto (`poster-anime-01.png`). Sem nova geração ou edição de pixels. A foto do controle Sony enviada pelo usuário serve somente para referência e não foi incluída no jogo.
+
+
+## Revisão v10: combate e posturas
+
+Nova folha original de chute aéreo, gerada com image_gen a partir da nossa personagem. Recortes e prompt em `GERACAO_V10.md`. Espada, granada, energia, agachar, rastejar e escada de costas reaproveitam a biblioteca existente. Dois efeitos sonoros novos foram sintetizados localmente. Os RARs de drivers enviados não integram o projeto.

@@ -1,8 +1,8 @@
 extends Node
 signal bindings_changed
-const PATH := "user://cyberpunk_controls_v1.cfg"
-const ACTIONS := ["move_left","move_right","jump","fire","attack_punch","attack_kick","guard","interact","pause","restart","main_menu"]
-const LABELS := ["Mover para a esquerda","Mover para a direita","Saltar / salto duplo","Atirar","Soco","Chute","Defender (segurar)","Acionar botão","Pausar","Reiniciar corredor","Menu principal"]
+const PATH := "user://cyberpunk_controls_v3.cfg"
+const ACTIONS := ["move_left","move_right","jump","attack_punch","attack_kick","fire","power","guard","grenade","sword","posture_down","interact","pause","restart","main_menu"]
+const LABELS := ["Mover para a esquerda","Mover para a direita","Saltar / salto duplo","Soco","Chute / chute aéreo","Atirar","Poder (segurar 2s)","Defender (segurar)","Granada","Espada","Agachar / rastejar (3s / 6s)","Acionar botão","Pausar","Reiniciar corredor","Menu principal"]
 const BUTTON_NAMES := {0:"A / ✕",1:"B / ○",2:"X / □",3:"Y / △",4:"Back / Select",5:"Guia / PS",6:"Menu / Start",7:"L3",8:"R3",9:"LB / L1",10:"RB / R1",11:"Direcional ↑",12:"Direcional ↓",13:"Direcional ←",14:"Direcional →"}
 var defaults := {}
 
@@ -10,20 +10,20 @@ var defaults := {}
 func _ready():
 	for action in ACTIONS:
 		if not InputMap.has_action(action): InputMap.add_action(action,0.22)
-		InputMap.action_set_deadzone(action,0.22)
-	for pair in [["fire",JOY_BUTTON_RIGHT_SHOULDER],["jump",JOY_BUTTON_A],["attack_punch",JOY_BUTTON_X],["attack_kick",JOY_BUTTON_B],["interact",JOY_BUTTON_Y],["guard",JOY_BUTTON_LEFT_SHOULDER],["pause",JOY_BUTTON_START],["move_left",JOY_BUTTON_DPAD_LEFT],["move_right",JOY_BUTTON_DPAD_RIGHT]]:
+		InputMap.action_set_deadzone(action,0.55 if action in ["jump","posture_down"] else 0.22)
+	for pair in [["fire",JOY_BUTTON_RIGHT_SHOULDER],["jump",JOY_BUTTON_DPAD_UP],["attack_punch",JOY_BUTTON_X],["attack_kick",JOY_BUTTON_Y],["interact",JOY_BUTTON_A],["guard",JOY_BUTTON_B],["sword",JOY_BUTTON_LEFT_SHOULDER],["posture_down",JOY_BUTTON_DPAD_DOWN],["pause",JOY_BUTTON_START],["move_left",JOY_BUTTON_DPAD_LEFT],["move_right",JOY_BUTTON_DPAD_RIGHT]]:
 		var event := InputEventJoypadButton.new()
 		event.device = -1
 		event.button_index = pair[1]
 		InputMap.action_add_event(pair[0],event)
-	for pair in [["move_left",JOY_AXIS_LEFT_X,-1.0],["move_right",JOY_AXIS_LEFT_X,1.0],["fire",JOY_AXIS_TRIGGER_RIGHT,1.0],["guard",JOY_AXIS_TRIGGER_LEFT,1.0]]:
+	for pair in [["move_left",JOY_AXIS_LEFT_X,-1.0],["move_right",JOY_AXIS_LEFT_X,1.0],["jump",JOY_AXIS_LEFT_Y,-1.0],["posture_down",JOY_AXIS_LEFT_Y,1.0],["power",JOY_AXIS_TRIGGER_RIGHT,1.0],["grenade",JOY_AXIS_TRIGGER_LEFT,1.0]]:
 		var event := InputEventJoypadMotion.new()
 		event.device = -1
 		event.axis = pair[1]
 		event.axis_value = pair[2]
 		InputMap.action_add_event(pair[0],event)
 
-	for pair in [["jump",KEY_SPACE],["restart",KEY_R],["main_menu",KEY_TAB]]:
+	for pair in [["jump",KEY_SPACE],["restart",KEY_R],["main_menu",KEY_TAB],["power",KEY_C],["grenade",KEY_G],["sword",KEY_H],["posture_down",KEY_S],["posture_down",KEY_DOWN]]:
 		var key := InputEventKey.new()
 		key.physical_keycode = pair[1]
 		if not InputMap.action_has_event(pair[0],key): InputMap.action_add_event(pair[0],key)
@@ -128,6 +128,7 @@ func describe(action: String,kind: String) -> String:
 		elif event is InputEventJoypadMotion:
 			if event.axis==JOY_AXIS_TRIGGER_RIGHT: names.append("RT / R2")
 			elif event.axis==JOY_AXIS_TRIGGER_LEFT: names.append("LT / L2")
+			elif event.axis==JOY_AXIS_LEFT_Y: names.append("Analógico ↑" if event.axis_value<0 else "Analógico ↓")
 			elif event.axis==JOY_AXIS_LEFT_X: names.append("Analógico ←" if event.axis_value<0 else "Analógico →")
 			else: names.append("Eixo %d %s" % [event.axis,"−" if event.axis_value<0 else "+"])
 	return ", ".join(names) if not names.is_empty() else "Não definido"
