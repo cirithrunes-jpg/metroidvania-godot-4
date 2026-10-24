@@ -23,6 +23,7 @@ var elapsed := 0.0
 var hud: CanvasLayer
 var exit_door: Node2D
 var pause_menu: CanvasLayer
+var relay_label: Label
 
 func _enter_tree():
 	MainInstances.world = self
@@ -93,6 +94,15 @@ func _ready():
 		enemy.patrol_radius = 16.0 if index == 1 else 20.0
 		add_child(enemy)
 		if not record.is_empty(): enemy.health = clampi(int(record.units[str(index)]),1,enemy.HEALTH[enemy.kind])
+	for index in 4:
+		if not record.is_empty() and record.has("props") and not record.props.has(str(index)): continue
+		var prop := Node2D.new()
+		prop.set_script(preload("res://prototype/breakable_prop.gd"))
+		prop.prop_id = index
+		prop.kind = index%2
+		prop.position = Vector2([300,740,1240,1660][index],300)
+		add_child(prop)
+		if not record.is_empty() and record.has("props"): prop.health = clampi(int(record.props[str(index)]),1,2 if prop.kind==0 else 1)
 	hud = CanvasLayer.new()
 	hud.set_script(preload("res://prototype/ui/campaign_hud.gd"))
 	add_child(hud)
@@ -105,7 +115,9 @@ func _ready():
 	exit_door.position = door_point
 	add_child(exit_door)
 	exit_door.entered.connect(begin_transition)
-	world_label("E: ACIONAR BOTÃO",relay_point+Vector2(-24,-34))
+	relay_label = world_label("",relay_point+Vector2(-24,-34))
+	CombatInput.bindings_changed.connect(refresh_control_label)
+	refresh_control_label()
 	world_label("PRÓXIMO SETOR" if sector<3 else "SAÍDA",door_point+Vector2(-24,-82))
 	Events.player_died.connect(respawn)
 	if Music.audio_stream_player.stream != LAB_SOUNDTRACK or not Music.audio_stream_player.playing:
@@ -119,6 +131,10 @@ func world_label(text: String, point: Vector2):
 	label.add_theme_font_size_override("font_size",19)
 	label.modulate = Color("b2e4ea")
 	add_child(label)
+	return label
+
+func refresh_control_label():
+	if is_instance_valid(relay_label): relay_label.text = "%s: ACIONAR BOTÃO" % CombatInput.describe("interact","key")
 
 func spawn_player():
 	player = preload("res://prototype/player.tscn").instantiate()
@@ -178,12 +194,12 @@ func toggle_pause():
 		if child is Node2D: child.process_mode = Node.PROCESS_MODE_DISABLED if paused else Node.PROCESS_MODE_INHERIT
 
 func _unhandled_input(event):
-	if event.is_action_pressed("pause") and not event.is_echo(): toggle_pause()
-
-func _unhandled_key_input(event):
-	if not event.pressed or event.echo or transitioning or paused: return
-	if event.physical_keycode == KEY_R: get_tree().reload_current_scene()
-	elif event.physical_keycode == KEY_TAB: get_tree().change_scene_to_file("res://menus/start_menu.tscn")
+	if event.is_echo() or transitioning: return
+	if event.is_action_pressed("pause") or (event is InputEventKey and event.pressed and event.physical_keycode==KEY_ESCAPE):
+		toggle_pause()
+	elif not paused:
+		if event.is_action_pressed("restart"): get_tree().reload_current_scene()
+		elif event.is_action_pressed("main_menu"): get_tree().change_scene_to_file("res://menus/start_menu.tscn")
 
 func _draw():
 	var source := Rect2(0,PLATFORM.get_height()*0.11,PLATFORM.get_width(),PLATFORM.get_height()*0.77)

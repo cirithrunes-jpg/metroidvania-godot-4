@@ -8,7 +8,7 @@ const FX = preload("res://prototype/combat/ballistic_fx.gd")
 func _ready():
 	add_to_group("enemy_projectiles")
 	collision_layer = 0
-	collision_mask = 17
+	collision_mask = 81
 	var collider := CollisionShape2D.new()
 	var circle := CircleShape2D.new()
 	circle.radius = 1.5
@@ -21,7 +21,7 @@ func _ready():
 func _physics_process(delta):
 	if spent: return
 	var next: Vector2 = global_position+velocity*delta
-	var query := PhysicsRayQueryParameters2D.create(global_position,next,17)
+	var query := PhysicsRayQueryParameters2D.create(global_position,next,81)
 	query.collide_with_areas = true
 	var hit := get_world_2d().direct_space_state.intersect_ray(query)
 	if not hit.is_empty():

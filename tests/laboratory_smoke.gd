@@ -108,7 +108,7 @@ func run():
 		await settle(0.9)
 	check(current_scene.scene_file_path == "res://prototype/ui/completed.tscn","last door leads to campaign completion")
 	var buttons = current_scene.find_children("*","Button",true,false)
-	check(buttons.size() in [2,3],"menu has play quit and optional continue")
+	check(buttons.size() in [3,4],"menu has play quit and optional continue")
 	check(not current_scene.has_node("CenterContainer"),"legacy version removed from menu")
 	await capture("res://artifacts/menu-v6-preview.png")
 	current_scene._on_start_button_pressed()

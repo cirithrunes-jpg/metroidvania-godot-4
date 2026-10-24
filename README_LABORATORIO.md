@@ -1,4 +1,4 @@
-# Laboratório — combate, controles e missão (v8)
+# Laboratório — controles personalizáveis e objetos quebráveis (v9)
 
 Projeto de `cirithrunes-jpg/metroidvania-godot-4`, branch `feature/laboratorio-cyberpunk`.
 Original preservado em `backup/original-2026-10-23`, commit `32b73e35851e0f6eb58ba2469b38e3d73daccd9a`. A main não foi alterada.
@@ -11,7 +11,7 @@ Original preservado em `backup/original-2026-10-23`, commit `32b73e35851e0f6eb58
 
 O ZIP local inclui o vídeo enviado. O vídeo não foi incluído no repositório público: essa publicação aguarda autorização explícita. Sem o arquivo `prototype/assets/video/introduction.ogv`, o jogo segue para a tela de missão e depois inicia a fase.
 
-A campanha tem **três corredores conectados**, cada um com 1920 unidades de comprimento (antes 960), câmera com movimento vertical, plataformas adicionais e 11 unidades de segurança. Os fundos mudam entre laboratório, fábrica de turbinas e manutenção de reator. Vigas em camadas, barris, latões e ferramentas decoram a fábrica; as vigas da frente encobrem a personagem sem bloquear fisicamente a passagem.
+A campanha tem **três corredores conectados**, cada um com 1920 unidades de comprimento (antes 960), câmera com movimento vertical, plataformas adicionais e 11 unidades de segurança. Os fundos mudam entre laboratório, fábrica de turbinas e manutenção de reator. Vigas em camadas, quatro barris/latões quebráveis por corredor e poucas ferramentas decoram a fábrica; as vigas da frente encobrem a personagem sem bloquear fisicamente a passagem.
 
 ## Controles
 
@@ -25,7 +25,7 @@ A campanha tem **três corredores conectados**, cada um com 1920 unidades de com
 
 Suba pelas plataformas até o botão luminoso e pressione E para liberar a porta e registrar o checkpoint. Apenas se aproximar do botão não o ativa. No **segundo corredor, a porta também está em uma plataforma alta**, acessível por outro conjunto de plataformas. Nas outras duas saídas, a porta fica ao nível do piso. A porta abre ao se aproximar depois de liberada e exige entrar na abertura para passar. A última porta encerra a campanha.
 
-Salvar progresso no menu de pausa grava setor, botão/checkpoint, vida e inimigos restantes em `user://cyberpunk_campaign_v1.json`. No menu principal, Continuar progresso salvo restaura a partida pelo checkpoint, sem repetir vídeo e missão. Jogar começa uma campanha nova e preserva o save anterior até salvar novamente. Quedas devolvem ao checkpoint com penalidade de vida; morte recria a personagem. A trilha fornecida toca em loop durante os corredores. O vídeo enviado pelo usuário é reproduzido ao iniciar uma nova campanha; ele não se repete após morrer ou atravessar uma porta.
+Salvar progresso no menu de pausa grava setor, botão/checkpoint, vida, inimigos restantes e objetos ainda inteiros em `user://cyberpunk_campaign_v1.json`. No menu principal, Continuar progresso salvo restaura a partida pelo checkpoint, sem repetir vídeo e missão. Jogar começa uma campanha nova e preserva o save anterior até salvar novamente. Quedas devolvem ao checkpoint com penalidade de vida; morte recria a personagem. A trilha fornecida toca em loop durante os corredores. O vídeo enviado pelo usuário é reproduzido ao iniciar uma nova campanha; ele não se repete após morrer ou atravessar uma porta.
 
 ## Movimento e aparência
 
@@ -53,7 +53,7 @@ godot --headless --path . --script res://tests/ballistics_smoke.gd
 godot --headless --path . --script res://tests/corridor_combat_smoke.gd
 ```
 
-116 verificações passaram: 35 de campanha, 24 de segurança, 7 de balística, 27 de combate/corredores e 23 de controles, pausa, áudio, missão e salvamento. As verificações cobrem campanha, portas, morte, checkpoint, controles, dano dos golpes, defesa e recarga, direção dos tiros, vídeo e alcance físico das plataformas até o botão. Capturas com renderização Compatibility/ANGLE também são inspecionadas. Os testes não substituem uma avaliação humana de dificuldade e ritmo.
+142 verificações passaram: 35 de campanha, 24 de segurança, 7 de balística, 27 de combate/corredores, 23 de controles/pausa/áudio/missão/save e 26 de personalização de comandos/pôster/objetos. As verificações cobrem campanha, portas, morte, checkpoint, controles, dano dos golpes, defesa e recarga, direção dos tiros, vídeo e alcance físico das plataformas até o botão. Capturas com renderização Compatibility/ANGLE também são inspecionadas. Os testes não substituem uma avaliação humana de dificuldade e ritmo.
 
 Este computador apresenta um aviso do repositório de certificados do Windows, também presente na base; não impediu os testes locais. Novos assets e vídeo estão dentro do projeto, sem depender das pastas Downloads ou Desktop.
 
@@ -74,3 +74,20 @@ Este computador apresenta um aviso do repositório de certificados do Windows, t
 Na pausa há Continuar, Salvar progresso, Controles e Menu principal. Navegue com direcional/analógico e confirme com A/✕. No teclado, use setas e Enter. Os comandos de teclado anteriores permanecem disponíveis. O suporte usa o mapeamento padrão de controles do Godot/SDL, sem exigir mouse na campanha. Os testes usam eventos de controle simulados; o comportamento de cada controle físico depende também do driver reconhecido pelo Windows.
 
 As vozes são sintéticas, geradas pela voz Microsoft Maria instalada no Windows, sem imitar uma pessoa real. Efeitos de tiro, impacto e escudo são sínteses originais, geradas para o projeto. Arte e prompt em `prototype/assets/GERACAO_V8.md`. Teste adicional: `godot --headless --path . --script res://tests/v8_controls_save_smoke.gd`.
+
+
+## Personalizar os comandos (v9)
+
+No menu principal, escolha **Configurar controles**; durante a fase, use **Pausa → Controles**. A tela tem uma coluna de teclado e outra de Xbox/PlayStation para cada uma das onze ações, incluindo movimento, salto, tiro, soco, chute, defesa, interação, pausa, reinício e menu principal.
+
+Selecione a célula da ação, pressione a tecla ou botão/gatilho/analógico desejado e use **Salvar e voltar**. Se o comando já estiver em uso, as duas ações trocam os comandos dessa categoria. **Voltar sem salvar** descarta as alterações. **Restaurar padrão** permite recuperar os comandos originais; salve em seguida para manter. Esc cancela a captura e permanece disponível para acessar a pausa, mesmo que você mude o comando de pausar. A navegação dos menus usa setas/direcional e Enter/A/✕, separadamente dos comandos da personagem.
+
+As configurações ficam em `user://cyberpunk_controls_v1.cfg`, separadas do progresso da campanha. Elas são carregadas ao abrir o jogo e permanecem após morte, troca de corredor e nova campanha. HUD e tela de configuração mostram os comandos atuais. Mouse continua sem função de mira/disparo; pode ser usado nos menus.
+
+## Menos latas, com destruição
+
+Cada corredor agora tem **duas latas e dois barris**. Uma lata quebra com um tiro; um barril aguenta dois. Socos, chutes e tiros dos inimigos também atingem os objetos. Há impacto sonoro e faíscas; os objetos não explodem e não travam a passagem da personagem. O salvamento mantém a destruição e o dano dos objetos. Saves anteriores continuam compatíveis e começam com os quatro objetos inteiros.
+
+O menu principal usa o pôster original da personagem já criado para o projeto: `prototype/assets/menu-poster.png`, cópia de `poster-anime-01.png`, sem modificar os pixels. A ilustração fica separada dos botões e mantém a proporção. A foto do controle enviada foi usada apenas como referência de nomes; não é redistribuída. As folhas de poses enviadas correspondem à biblioteca existente e não foram usadas para substituir as animações nesta revisão.
+
+Teste da revisão: `godot --headless --path . --script res://tests/v9_remap_props_smoke.gd`. Ele cobre captura de comandos, conflitos, persistência, cancelamento, spawn após remapeamento, HUD, pausa, pôster, dano por projéteis/golpes e restauração dos objetos no save.

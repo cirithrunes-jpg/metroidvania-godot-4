@@ -10,7 +10,7 @@ func _ready():
 
 func _physics_process(delta):
 	var next: Vector2 = global_position+velocity*delta
-	var query := PhysicsRayQueryParameters2D.create(global_position,next,33)
+	var query := PhysicsRayQueryParameters2D.create(global_position,next,97)
 	query.collide_with_areas = true
 	var hit := get_world_2d().direct_space_state.intersect_ray(query)
 	if not hit.is_empty():

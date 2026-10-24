@@ -29,7 +29,7 @@ func melee_strike():
 	box.size = Vector2(30 if melee_kind == "kick" else 24,25)
 	query.shape = box
 	query.transform = Transform2D(0,global_position+Vector2(facing*22,-15))
-	query.collision_mask = 32
+	query.collision_mask = 96
 	query.collide_with_areas = true
 	query.collide_with_bodies = false
 	for hit in get_world_2d().direct_space_state.intersect_shape(query):
@@ -39,15 +39,6 @@ func melee_strike():
 			target.take_hit(self,2 if melee_kind == "kick" else 1)
 
 func _ready():
-	bind_key("fire",KEY_Z)
-	bind_key("attack_punch",KEY_J)
-	bind_key("attack_kick",KEY_K)
-	bind_key("guard",KEY_L)
-	bind_key("interact",KEY_E)
-	bind_key("pause",KEY_ESCAPE)
-	var space := InputEventKey.new()
-	space.physical_keycode = KEY_SPACE
-	if not InputMap.action_has_event("jump",space): InputMap.action_add_event("jump",space)
 	PlayerStats.no_health.connect(die)
 	max_velocity = 72
 	acceleration = 360

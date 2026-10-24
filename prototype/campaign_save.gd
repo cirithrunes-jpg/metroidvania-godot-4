@@ -20,6 +20,12 @@ func read_record() -> Dictionary:
 		var amount = value.units[key]
 		if not (amount is float or amount is int): return {}
 		if not is_finite(float(amount)) or amount<1 or amount>5: return {}
+	if value.has("props"):
+		if not value.props is Dictionary: return {}
+		for key in value.props:
+			var amount = value.props[key]
+			if not str(key).is_valid_int() or int(key)<0 or int(key)>3: return {}
+			if not (amount is int or amount is float) or amount<1 or amount>2: return {}
 	value["sector"] = int(value.sector)
 	value["health"] = int(value.health)
 	return value
@@ -29,8 +35,11 @@ func save_scene(scene) -> bool:
 	var units := {}
 	for unit in get_tree().get_nodes_in_group("lab_enemies"):
 		if not unit.dying: units[str(unit.spawn_id)] = unit.health
+	var props := {}
+	for prop in get_tree().get_nodes_in_group("breakable_props"):
+		if not prop.broken: props[str(prop.prop_id)] = prop.health
 	# Resume at the activated checkpoint, avoiding midair or door-trigger saves.
-	var record := {"version":1,"sector":scene.sector,"relay":scene.relay,"health":maxi(1,PlayerStats.health),"units":units,"facing":scene.player.facing}
+	var record := {"version":1,"sector":scene.sector,"relay":scene.relay,"health":maxi(1,PlayerStats.health),"units":units,"props":props,"facing":scene.player.facing}
 	var file := FileAccess.open(PATH+".tmp",FileAccess.WRITE)
 	if file == null: return false
 	file.store_string(JSON.stringify(record))

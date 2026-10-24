@@ -58,3 +58,8 @@ O atlas antigo `player/player.png` e seu arquivo de importacao foram excluidos n
 ## Revisão v8
 
 Nova arte de corrida armada, rifle e escudo, criada com image_gen a partir da personagem original, e efeitos/voz sintética locais. Arquivos, método e prompt em `GERACAO_V8.md`. Nenhuma arte ou gravação de outra franquia foi incorporada.
+
+
+## Revisão v9: pôster no menu
+
+`menu-poster.png` é uma cópia integral do pôster anime original já gerado para a personagem no projeto (`poster-anime-01.png`). Sem nova geração ou edição de pixels. A foto do controle Sony enviada pelo usuário serve somente para referência e não foi incluída no jogo.

@@ -37,13 +37,10 @@ func _draw():
 	for x in range(60+sector*35,1920,230):
 		draw_rect(Rect2(x,12,9,280),Color("17242e"))
 		draw_line(Vector2(x,30),Vector2(x+150,110+sector*15),Color("263a45"),5)
-	for index in 16:
-		var x := 100.0+index*110
-		if (x>420 and x<500) or (x>1020 and x<1100) or (x>1440 and x<1520): continue
-		var y := 300.0
-		var type := (index+sector)%4
-		var regions := [Rect2(106,90,365,556),Rect2(580,110,406,535),Rect2(1055,286,531,342),Rect2(1660,449,452,191)]
-		var source: Rect2 = regions[type]
-		var height: float = [22.0,20.0,10.0,5.0][type]
+	# Sparse floor dressing; the four cans/barrels are separate breakable nodes.
+	for index in 3:
+		var x: float = [560,1130,1550][index]
+		var source := Rect2(1055,286,531,342) if index!=1 else Rect2(1660,449,452,191)
+		var height := 10.0 if index!=1 else 5.0
 		var width := source.size.x/source.size.y*height
-		draw_texture_rect_region(PROPS,Rect2(x,y-height,width,height),source)
+		draw_texture_rect_region(PROPS,Rect2(x,300-height,width,height),source)

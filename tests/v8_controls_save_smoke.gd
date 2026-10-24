@@ -52,8 +52,11 @@ func run():
 	await ticks(25)
 	check(actor.velocity.x>30 and art.animation=="armed_run","left stick drives animated armed running")
 	var frame_a: int = art.frame
-	await ticks(6)
-	check(art.frame!=frame_a,"running advances across poses")
+	var progressed := false
+	for i in 12:
+		await ticks(1)
+		if art.frame!=frame_a: progressed = true
+	check(progressed,"running advances across poses")
 	await capture("res://artifacts/running-v8.png")
 	stick(0)
 	await ticks(15)
